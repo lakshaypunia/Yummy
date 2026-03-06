@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id            String           @id @default(cuid()) 
+  clerkId       String           @unique 
+  email         String           @unique
+  firstName     String?
+  lastName      String?
+  fullName      String?
+  avatarUrl     String?
+  role          UserRole         @default(STUDENT)
+  permissions   Json?
+  progress      Json?
+  preferences   Json?
+  plan          SubscriptionPlan @default(FREE)
+  credits       Int              @default(0)
+  deletedAt     DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  pages         Page[]
+  spaces        Space[]
+}
+
+enum SpaceTimeline {
+  SPRINT
+  PROJECT
+  LEARNING_PATH
+  CONTINUOUS
+}
+
+enum SpaceVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum ContentFormatPreference {
+  TEXT_FOCUSED
+  VIDEO_FOCUSED
+  INTERACTIVE
+  HYBRID
+}
+
+enum DepthPreference {
+  SUMMARY
+  CONCISE
+  BALANCED
+  DETAILED
+  DEEP_DIVE
+}
+
+enum LearningStyle {
+  SELF_PACED
+  SPRINT_BASED
+  STRUCTURED_PATH
+  PROJECT_BASED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Space {
+  id                      String   @id @default(uuid())
+  name                    String
+  description             String?
+  timeline                SpaceTimeline
+  visibility              SpaceVisibility @default(PRIVATE)
+  authorId                String
+  
+  goal                    String
+  skillLevel              SkillLevel
+  tags                    String[]
+  
+  learningStyle           LearningStyle            
+  contentFormatPreference ContentFormatPreference  
+  depthPreference         DepthPreference
+  resources               String[]
+  project_roadmap         Json
+
+  deletedAt               DateTime?
+
+  author                  User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  pages                   Page[]
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([goal])
+  @@index([skillLevel])
+  @@index([visibility])
+}
+
+model Page {
+  id            String    @id @default(uuid())
+  title         String
+  rawDocument   Json?
+  authorId      String
+  parentPageId  String?
+  depth         Int       @default(0)
+  spaceId       String
+  isIntialised  Boolean   @default(false)
+  blockJson     Json?
+  isRead        Boolean   @default(false)
+
+  deletedAt     DateTime?
+
+  parentPage    Page?     @relation("PageChildren", fields: [parentPageId], references: [id], onDelete: SetNull)
+  childPages    Page[]    @relation("PageChildren")
+
+  blocks        Block[]   @relation("PageBlocks")
+  linkedFrom    Block[]   @relation("BlockTargetPage")
+  author        User      @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([authorId])
+  @@index([parentPageId])
+  @@index([spaceId])
+  @@index([createdAt])
+  @@index([parentPageId, createdAt])
+}
+
+model Block {
+  id           String   @id @default(uuid())
+
+  page         Page     @relation("PageBlocks", fields: [pageId], references: [id], onDelete: Cascade)
+  pageId       String
+
+  parentBlockId String?
+  parentBlock   Block?   @relation("BlockChildren", fields: [parentBlockId], references: [id])
+  children      Block[]  @relation("BlockChildren")
+
+  targetPageId String?
+  targetPage   Page?     @relation("BlockTargetPage", fields: [targetPageId], references: [id])
+
+  type         String
+  content      Json?
+  position     Int
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([pageId, position])
+  @@index([targetPageId])
+}
