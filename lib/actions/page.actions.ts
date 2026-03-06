@@ -4,16 +4,30 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
+// Helper to check if a user is in a space
+async function isUserInSpace(spaceId: string, userId: string) {
+    const space = await prisma.space.findUnique({ where: { id: spaceId } });
+    if (space?.authorId === userId) return { isAuthor: true, isMember: true };
+
+    const member = await prisma.spaceMember.findUnique({
+        where: { spaceId_userId: { spaceId, userId } }
+    });
+    return { isAuthor: false, isMember: !!member };
+}
+
 export async function getPagesForSpace(spaceId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     try {
+        const { isAuthor, isMember } = await isUserInSpace(spaceId, userId);
+        if (!isMember) return [];
+
         const pages = await prisma.page.findMany({
             where: {
                 spaceId,
-                authorId: userId,
                 deletedAt: null,
+                ...(isAuthor ? {} : { visibility: { not: "PRIVATE" } }) // Hide private pages from standard members
             },
             orderBy: {
                 createdAt: "asc",
@@ -34,14 +48,21 @@ export async function getPage(pageId: string) {
         const page = await prisma.page.findFirst({
             where: {
                 id: pageId,
-                authorId: userId,
                 deletedAt: null,
             },
             include: {
                 space: true,
             }
         });
-        return page;
+
+        if (!page) return null;
+
+        const { isAuthor, isMember } = await isUserInSpace(page.spaceId, userId);
+        if (!isMember) return null;
+        if (!isAuthor && page.visibility === "PRIVATE") return null;
+
+        // Return the resolved page and if the user has edit access
+        return { ...page, canEdit: isAuthor || page.visibility === "EDITABLE" };
     } catch (error) {
         console.error("Failed to fetch page:", error);
         return null;
@@ -53,6 +74,11 @@ export async function createPage(spaceId: string, title: string = "New Page") {
     if (!userId) throw new Error("Unauthorized");
 
     try {
+        const { isAuthor } = await isUserInSpace(spaceId, userId);
+        if (!isAuthor) {
+            return { success: false, error: "Only the author can create new pages" };
+        }
+
         const page = await prisma.page.create({
             data: {
                 title,
@@ -60,13 +86,14 @@ export async function createPage(spaceId: string, title: string = "New Page") {
                 authorId: userId,
                 depth: 0,
                 isIntialised: true,
+                visibility: "EDITABLE",
                 blockJson: [
                     {
                         type: "heading",
                         props: { level: 1 },
                         content: title,
                     }
-                ] as any,
+                ] as any, // eslint-disable-line @typescript-eslint/no-explicit-any
             },
         });
 
@@ -78,26 +105,54 @@ export async function createPage(spaceId: string, title: string = "New Page") {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function savePageBlocks(pageId: string, blocks: any[]) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     try {
-        // We are trusting the client blocks structure directly as JSON
-        // for this initial web implementation
-        const page = await prisma.page.update({
-            where: {
-                id: pageId,
-                authorId: userId,
-            },
-            data: {
-                blockJson: blocks as any,
-            },
+        const page = await prisma.page.findUnique({ where: { id: pageId } });
+        if (!page) return { success: false, error: "Page not found" };
+
+        const { isAuthor, isMember } = await isUserInSpace(page.spaceId, userId);
+
+        // Block saves if they aren't the author and the page is NOT editable
+        if (!isAuthor && (!isMember || page.visibility !== "EDITABLE")) {
+            return { success: false, error: "Write access denied" };
+        }
+
+        await prisma.page.update({
+            where: { id: pageId },
+            data: { blockJson: blocks as any }, // eslint-disable-line @typescript-eslint/no-explicit-any
         });
 
         return { success: true };
     } catch (error) {
         console.error("Failed to save page:", error);
+        return { success: false };
+    }
+}
+
+export async function updatePageVisibility(pageId: string, visibility: "PRIVATE" | "VIEW_ONLY" | "EDITABLE") {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    try {
+        const page = await prisma.page.findUnique({ where: { id: pageId } });
+        if (!page || page.authorId !== userId) {
+            return { success: false, error: "Only the author can change visibility" };
+        }
+
+        await prisma.page.update({
+            where: { id: pageId },
+            data: { visibility }
+        });
+
+        revalidatePath(`/dashboard/spaces/${page.spaceId}`);
+        revalidatePath(`/dashboard/spaces/${page.spaceId}/pages/${pageId}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update visibility:", error);
         return { success: false };
     }
 }

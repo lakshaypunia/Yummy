@@ -3,6 +3,7 @@ import { getSpaces } from "@/lib/actions/space.actions";
 import Link from "next/link";
 import { Folder } from "lucide-react";
 import { CreateSpaceForm } from "@/components/CreateSpaceForm";
+import { JoinSpaceModal } from "@/components/JoinSpaceModal";
 
 export default async function Dashboard() {
     // Basic query to fetch real spaces
@@ -16,9 +17,12 @@ export default async function Dashboard() {
                     <p className="text-[var(--color-text-muted)]">Create a new workspace or select an existing one to continue.</p>
                 </div>
 
-                <div className="mb-8">
-                    <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Create New</h3>
-                    <CreateSpaceForm />
+                <div className="mb-8 flex flex-wrap items-end gap-0">
+                    <div>
+                        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Create New</h3>
+                        <CreateSpaceForm />
+                    </div>
+                    <JoinSpaceModal />
                 </div>
 
                 <div>

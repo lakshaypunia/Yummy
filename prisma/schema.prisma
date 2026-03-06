@@ -40,6 +40,7 @@ model User {
 
   pages         Page[]
   spaces        Space[]
+  joinedSpaces  SpaceMember[]    @relation("UserJoinedSpaces")
 }
 
 enum SpaceTimeline {
@@ -104,6 +105,7 @@ model Space {
   deletedAt               DateTime?
 
   author                  User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  members                 SpaceMember[] @relation("SpaceMembers")
   pages                   Page[]
 
   createdAt               DateTime @default(now())
@@ -113,6 +115,33 @@ model Space {
   @@index([goal])
   @@index([skillLevel])
   @@index([visibility])
+}
+
+enum SpaceMemberRole {
+  ADMIN
+  MEMBER
+}
+
+model SpaceMember {
+  id        String   @id @default(uuid())
+  spaceId   String
+  userId    String
+  role      SpaceMemberRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  space     Space    @relation("SpaceMembers", fields: [spaceId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserJoinedSpaces", fields: [userId], references: [clerkId], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@index([spaceId])
+}
+
+enum PageVisibility {
+  PRIVATE
+  VIEW_ONLY
+  EDITABLE
 }
 
 model Page {
@@ -126,6 +155,7 @@ model Page {
   isIntialised  Boolean   @default(false)
   blockJson     Json?
   isRead        Boolean   @default(false)
+  visibility    PageVisibility @default(EDITABLE)
 
   deletedAt     DateTime?
 

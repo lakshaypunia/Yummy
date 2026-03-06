@@ -4,85 +4,178 @@ import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { savePageBlocks } from "@/lib/actions/page.actions";
 import { schema } from "@/components/blockNote/schema";
-
-function debounce<T extends (...args: any[]) => any>(
-    func: T,
-    wait: number
-): (...args: Parameters<T>) => void {
-    let timeout: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-    };
-}
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
 interface BlockNoteContainerProps {
     pageId: string;
     initialTitle: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialContent?: any[];
+    editable?: boolean;
 }
 
-export default function BlockNoteContainer({ pageId, initialTitle, initialContent }: BlockNoteContainerProps) {
-    const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error">("saved");
+function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, provider, setSaveStatus }: BlockNoteContainerProps & { doc: Y.Doc, provider: WebsocketProvider, setSaveStatus: (status: "saved" | "saving" | "error" | "syncing") => void }) {
+
+    const timeoutRef = useRef<NodeJS.Timeout>(null);
+    const editableRef = useRef(editable);
+
+    // Keep the editable ref up-to-date without causing the callback to re-trigger
+    useEffect(() => {
+        editableRef.current = editable;
+    }, [editable]);
+
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, []);
 
     // Debounced save to the database using Server Action
+    // We still do this so Postgres has a cold-storage backup of the document
     const debouncedSave = useCallback(
-        debounce(async (id: string, blocks: any[]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (id: string, blocks: any[]) => {
+            if (!editableRef.current) return; // Don't let viewers thrash the DB
+
             setSaveStatus("saving");
-            const res = await savePageBlocks(id, blocks);
-            if (res.success) {
-                setSaveStatus("saved");
-            } else {
-                setSaveStatus("error");
-            }
-        }, 1000),
-        []
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+            timeoutRef.current = setTimeout(async () => {
+                const res = await savePageBlocks(id, blocks);
+                if (res.success) {
+                    setSaveStatus("saved");
+                } else {
+                    setSaveStatus("error");
+                }
+            }, 2000);
+        },
+        [setSaveStatus]
     );
 
-    // Initialize the editor with safety checks and fallback
     const editor = useCreateBlockNote({
         schema,
-        initialContent: useMemo(() => {
-            if (initialContent && Array.isArray(initialContent) && initialContent.length > 0) {
-                try {
-                    // If it was already proper JSON but failed internal BlockNote validation, we'll try to just return it
-                    return initialContent;
-                } catch (e) {
-                    console.error("BlockNote failed to parse initialContent:", e);
-                    // Fallthrough to default
-                }
+        collaboration: {
+            provider,
+            fragment: doc.getXmlFragment("document-store"),
+            user: {
+                name: "User", // TODO: Wire to Clerk profile
+                color: "#" + Math.floor(Math.random() * 16777215).toString(16) // Random color for cursor
             }
-
-            // Default safe fallback if undefined, empty, or improperly formatted
-            return [
-                {
-                    type: "heading",
-                    props: { level: 1 },
-                    content: initialTitle,
-                },
-            ];
-        }, [initialContent, initialTitle]),
+        }
     });
 
+    // Seed the document from PostgreSQL ONLY if the Yjs document arrived empty
+    useEffect(() => {
+        if (!editor || !initialContent || initialContent.length === 0) return;
+
+        // This checks if the document is essentially the default empty state
+        const isEmpty = editor.document.length === 1 && editor.document[0].type === "paragraph" && !editor.document[0].content;
+
+        if (isEmpty) {
+            console.log("Seeding Yjs document from PostgreSQL...");
+            try {
+                editor.replaceBlocks(editor.document, initialContent);
+            } catch (e) {
+                console.error("Failed to seed initial content:", e);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                editor.replaceBlocks(editor.document, [{ type: "heading", props: { level: 1 }, content: initialTitle }] as any);
+            }
+        }
+    }, [editor, initialContent, initialTitle]);
+
+    if (!editor) return null;
+
     return (
-        <div className="flex-1 flex flex-col h-full w-full bg-[var(--color-blockNote-background)] relative">
-            <div className="absolute top-4 right-8 z-10 text-xs font-medium px-2 py-1 rounded bg-[var(--color-secondary)]/80 text-[var(--color-text-muted)] backdrop-blur-sm shadow-sm pointer-events-none">
+        <div className="flex-1 overflow-y-auto w-full py-2 px-2 sm:px-4">
+            <BlockNoteView
+                editor={editor}
+                theme="light"
+                editable={editable}
+                onChange={() => debouncedSave(pageId, editor.document)}
+                className="min-h-full"
+            />
+        </div>
+    );
+}
+
+export default function BlockNoteContainer({ pageId, initialTitle, initialContent, editable = true }: BlockNoteContainerProps) {
+    const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | "syncing">("syncing");
+
+    // Yjs State
+    const [doc, setDoc] = useState<Y.Doc>();
+    const [provider, setProvider] = useState<WebsocketProvider>();
+    const [isSynced, setIsSynced] = useState(false);
+
+    useEffect(() => {
+        // Create the Yjs document
+        const yDoc = new Y.Doc();
+
+        // Connect to our Custom Node Sync Server 
+        // We use the pageId as the unique "Room" identifier
+        const yProvider = new WebsocketProvider(
+            "ws://localhost:1234",
+            pageId,
+            yDoc
+        );
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        yProvider.on("status", (event: { status: string }) => {
+            if (event.status === "connected") {
+                setSaveStatus("saved");
+            } else {
+                setSaveStatus("syncing");
+            }
+        });
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        yProvider.on("sync", (synced: boolean) => {
+            setIsSynced(synced);
+        });
+
+        setDoc(yDoc);
+        setProvider(yProvider);
+
+        return () => {
+            yDoc.destroy();
+            yProvider.destroy();
+        };
+    }, [pageId]);
+
+    // Show loading state until we're connected AND synced with the room's history
+    if (!doc || !provider || !isSynced) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 w-full h-full bg-[var(--color-blockNote-background)]">
+                <div className="text-sm text-[var(--color-text-muted)] animate-pulse flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[var(--color-highlight)] rounded-full mr-2" />
+                    Connecting to Live Workspace...
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex-1 flex flex-col h-full w-full bg-[var(--color-blockNote-background)] relative animate-in fade-in duration-500">
+            <div className="absolute top-4 right-8 z-10 text-xs font-medium px-2 py-1 rounded bg-[var(--color-secondary)]/80 text-[var(--color-text-muted)] backdrop-blur-sm shadow-sm pointer-events-none transition-all">
                 {saveStatus === "saving" && "Saving..."}
-                {saveStatus === "saved" && "Saved to Yummy Web"}
-                {saveStatus === "error" && <span className="text-red-500">Failed to save</span>}
+                {saveStatus === "saved" && <span className="text-green-600 font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Live</span>}
+                {saveStatus === "syncing" && <span className="text-orange-500">Reconnecting...</span>}
+                {saveStatus === "error" && <span className="text-red-500">Failed to save locally</span>}
             </div>
 
-            <div className="flex-1 overflow-y-auto w-full py-2 px-2 sm:px-4">
-                <BlockNoteView
-                    editor={editor}
-                    theme="light"
-                    onChange={() => debouncedSave(pageId, editor.document)}
-                    className="min-h-full"
-                />
-            </div>
+            <InnerEditor
+                pageId={pageId}
+                initialTitle={initialTitle}
+                initialContent={initialContent}
+                editable={editable}
+                doc={doc}
+                provider={provider}
+                setSaveStatus={setSaveStatus}
+            />
         </div>
     );
 }

@@ -1,29 +1,46 @@
 "use client";
 
+import { useRealtimeSpace } from "@/components/RealtimeSpaceContext";
 import { createPage } from "@/lib/actions/page.actions";
-import { ChevronLeft, ChevronRight, FileText, Plus, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, Check } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface PageSidebarProps {
     spaceId: string;
-    initialPages: { id: string; title: string }[];
+    initialPages: { id: string; title: string; visibility?: string }[];
 }
 
 export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [copied, setCopied] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+    const { triggerSidebarRefresh } = useRealtimeSpace();
 
     const handleCreatePage = async () => {
         setIsCreating(true);
         const result = await createPage(spaceId, "Untitled Page");
         if (result.success && result.pageId) {
+            triggerSidebarRefresh();
             router.push(`/dashboard/spaces/${spaceId}/pages/${result.pageId}`);
         }
         setIsCreating(false);
+    };
+
+    const handleShare = () => {
+        navigator.clipboard.writeText(spaceId);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const getVisibilityIcon = (visibility?: string, isActive?: boolean) => {
+        const className = `w-4 h-4 shrink-0 ${isActive ? "text-[var(--color-text-highlight)]" : "text-[var(--color-text-muted)]"}`;
+        if (visibility === "PRIVATE") return <Lock className={className} />;
+        if (visibility === "VIEW_ONLY") return <Eye className={className} />;
+        return <FileText className={className} />;
     };
 
     if (isMinimized) {
@@ -54,7 +71,7 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
                                 }`}
                             title={page.title}
                         >
-                            <FileText className="w-5 h-5" />
+                            {getVisibilityIcon(page.visibility, pathname.includes(page.id))}
                         </Link>
                     ))}
                 </div>
@@ -100,12 +117,28 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
                                     : "text-[var(--color-text-muted)] hover:bg-[var(--color-primary)] hover:shadow-sm border border-transparent"
                                     }`}
                             >
-                                <FileText className={`w-4 h-4 shrink-0 ${isActive ? "text-[var(--color-text-highlight)]" : "text-[var(--color-text-muted)]"}`} />
+                                {getVisibilityIcon(page.visibility, isActive)}
                                 <span className="truncate">{page.title}</span>
                             </Link>
                         );
                     })
                 )}
+            </div>
+
+            <div className="p-4 border-t border-[var(--color-border-primary)] shrink-0">
+                <button
+                    onClick={handleShare}
+                    className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all ${copied
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : "bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"
+                        }`}
+                >
+                    {copied ? (
+                        <><Check className="w-4 h-4" /> Copied ID</>
+                    ) : (
+                        <><Share2 className="w-4 h-4 text-[var(--color-text-muted)]" /> Share Space</>
+                    )}
+                </button>
             </div>
         </div>
     );
