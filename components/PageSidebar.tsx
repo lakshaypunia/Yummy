@@ -2,8 +2,9 @@
 
 import { useRealtimeSpace } from "@/components/RealtimeSpaceContext";
 import { createPage } from "@/lib/actions/page.actions";
-import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, Check, PenTool } from "lucide-react";
 import Link from "next/link";
+import { useWhiteboardStore } from "@/hooks/useWhiteboardStore";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -125,7 +126,13 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
                 )}
             </div>
 
-            <div className="p-4 border-t border-[var(--color-border-primary)] shrink-0">
+            <div className="p-4 border-t border-[var(--color-border-primary)] shrink-0 flex flex-col gap-2">
+                <button
+                    onClick={() => useWhiteboardStore.getState().open()}
+                    className="w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"
+                >
+                    <PenTool className="w-4 h-4 text-[var(--color-text-muted)]" /> Space Whiteboard
+                </button>
                 <button
                     onClick={handleShare}
                     className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all ${copied

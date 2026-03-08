@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { ensureUserExists } from "@/lib/actions/user.actions";
@@ -149,5 +148,39 @@ export async function joinSpace(spaceId: string) {
             return { success: false, error: "You have already joined this space" };
         }
         return { success: false, error: "Failed to join space" };
+    }
+}
+
+export async function getOrCreateChat(spaceId: string) {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+    await ensureUserExists();
+
+    try {
+        // Try to find existing chat
+        let chat = await prisma.chat.findFirst({
+            where: {
+                spaceId,
+                userId,
+                status: "ACTIVE",
+                deletedAt: null
+            }
+        });
+
+        // If no chat exists, create one
+        if (!chat) {
+            chat = await prisma.chat.create({
+                data: {
+                    spaceId,
+                    userId,
+                    status: "ACTIVE"
+                }
+            });
+        }
+
+        return { success: true, chatId: chat.id };
+    } catch (error) {
+        console.error("Failed to get or create chat:", error);
+        return { success: false, error: "Failed to initialize chat" };
     }
 }

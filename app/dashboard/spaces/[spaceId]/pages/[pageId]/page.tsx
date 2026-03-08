@@ -1,5 +1,7 @@
 import { getPage } from "@/lib/actions/page.actions";
+import { getOrCreateChat } from "@/lib/actions/space.actions";
 import { notFound, redirect } from "next/navigation";
+import { PageEditorLayout } from "@/components/editor/PageEditorLayout";
 import { EditorWrapper } from "@/components/editor/EditorWrapper";
 import { auth } from "@clerk/nextjs/server";
 import { PageVisibilityToggle } from "@/components/PageVisibilityToggle";
@@ -22,6 +24,12 @@ export default async function PageEditorView({
         return notFound();
     }
 
+    // Try to get or create chat for the user
+    const chatResult = await getOrCreateChat(spaceId);
+    if (!chatResult.success || !chatResult.chatId) {
+        throw new Error(`Chat initialization failed: ${chatResult.error}`);
+    }
+
     const isAuthor = page.authorId === userId;
 
     return (
@@ -41,8 +49,9 @@ export default async function PageEditorView({
                 )}
             </div>
 
-            <EditorWrapper
+            <PageEditorLayout
                 pageId={page.id}
+                chatId={chatResult.chatId}
                 initialTitle={page.title}
                 initialContent={page.blockJson ? (page.blockJson as any) : undefined}
                 editable={page.canEdit}

@@ -3,6 +3,8 @@
 import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
+import { SuggestionMenuController, getDefaultReactSlashMenuItems } from "@blocknote/react";
+import { filterSuggestionItems } from "@blocknote/core/extensions";
 import "@blocknote/mantine/style.css";
 import { useCallback, useState, useEffect, useRef } from "react";
 import { savePageBlocks } from "@/lib/actions/page.actions";
@@ -88,6 +90,22 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
         }
     }, [editor, initialContent, initialTitle]);
 
+    const insertExcalidraw = (editor: typeof schema.BlockNoteEditor) => ({
+        title: "Whiteboard (Excalidraw)",
+        onItemClick: () => {
+            const currentBlock = editor.getTextCursorPosition().block;
+            // Replace the empty paragraph block with the new block, or insert after
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "excalidraw" }]);
+            } else {
+                editor.insertBlocks([{ type: "excalidraw" }], currentBlock, "after");
+            }
+        },
+        aliases: ["whiteboard", "drawing", "excalidraw", "board"],
+        group: "Media",
+        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+    });
+
     if (!editor) return null;
 
     return (
@@ -98,7 +116,21 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
                 editable={editable}
                 onChange={() => debouncedSave(pageId, editor.document)}
                 className="min-h-full"
-            />
+                slashMenu={false}
+            >
+                <SuggestionMenuController
+                    triggerCharacter={"/"}
+                    getItems={async (query) =>
+                        filterSuggestionItems(
+                            [
+                                ...getDefaultReactSlashMenuItems(editor),
+                                insertExcalidraw(editor),
+                            ],
+                            query
+                        )
+                    }
+                />
+            </BlockNoteView>
         </div>
     );
 }

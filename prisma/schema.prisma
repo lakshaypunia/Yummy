@@ -41,6 +41,8 @@ model User {
   pages         Page[]
   spaces        Space[]
   joinedSpaces  SpaceMember[]    @relation("UserJoinedSpaces")
+  chats         Chat[]
+  p5Animations  P5Animation[]
 }
 
 enum SpaceTimeline {
@@ -107,6 +109,8 @@ model Space {
   author                  User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
   members                 SpaceMember[] @relation("SpaceMembers")
   pages                   Page[]
+  chats                   Chat[]
+  whiteboard              Whiteboard?
 
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -115,6 +119,19 @@ model Space {
   @@index([goal])
   @@index([skillLevel])
   @@index([visibility])
+}
+
+model Whiteboard {
+  id        String   @id @default(uuid())
+  spaceId   String   @unique
+  elements  Json?
+  appState  Json?
+  files     Json?
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([spaceId])
 }
 
 enum SpaceMemberRole {
@@ -200,3 +217,86 @@ model Block {
   @@index([pageId, position])
   @@index([targetPageId])
 }
+
+enum MessageRole {
+  USER
+  SYSTEM
+}
+
+enum ChatStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+model Chat {
+  id          String      @id @default(uuid())
+  spaceId     String
+  userId      String      // The user who created/owns this chat
+  title       String?     // Optional: auto-generated or user-provided
+  status      ChatStatus  @default(ACTIVE)
+  
+  // Metadata for AI context
+  context     Json?       // Store space context, settings, model preferences
+  
+  // Soft delete
+  deletedAt   DateTime?
+  
+  // Relations
+  space       Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  messages    Message[]
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Indexes
+  @@index([spaceId])
+  @@index([userId])
+  @@index([spaceId, userId])
+  @@index([status])
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  chatId      String
+  role        MessageRole
+  content     String      @db.Text // Use Text for longer messages
+  
+  // Optional: for multimodal content (images, files, etc.)
+  attachments Json?
+  
+  // Token tracking for billing/analytics
+  tokenCount  Int?
+  
+  // For streaming/editing support
+  isComplete  Boolean     @default(true)
+  
+  // AI intent classification and extensible metadata
+  metadata    Json?
+  
+  // Soft delete
+  deletedAt   DateTime?
+  
+  // Relations
+  chat        Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Indexes - IMPORTANT for performance
+  @@index([chatId, createdAt]) // Fetch messages in order
+  @@index([chatId, role])      // Filter by role if needed
+}
+
+model P5Animation {
+  id        String   @id @default(uuid())
+  code      String   @db.Text
+  userId    String
+  user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
