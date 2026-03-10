@@ -2,11 +2,13 @@
 
 import { useRealtimeSpace } from "@/components/RealtimeSpaceContext";
 import { createPage } from "@/lib/actions/page.actions";
-import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, Check, PenTool } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, Check, PenTool, Video } from "lucide-react";
 import Link from "next/link";
 import { useWhiteboardStore } from "@/hooks/useWhiteboardStore";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useBroadcastStore } from "@/hooks/useBroadcastStore";
+import { useUser } from "@clerk/nextjs";
 
 interface PageSidebarProps {
     spaceId: string;
@@ -42,6 +44,34 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
         if (visibility === "PRIVATE") return <Lock className={className} />;
         if (visibility === "VIEW_ONLY") return <Eye className={className} />;
         return <FileText className={className} />;
+    };
+
+    const { token, joinBroadcast, leaveBroadcast } = useBroadcastStore();
+    const { user } = useUser();
+    const [isStartingBroadcast, setIsStartingBroadcast] = useState(false);
+
+    const handleToggleBroadcast = async () => {
+        if (token) {
+            leaveBroadcast();
+        } else {
+            if (!user) return;
+            setIsStartingBroadcast(true);
+            try {
+                const res = await fetch(
+                    `/api/livekit/get-token?room=space-${spaceId}&participantName=${encodeURIComponent(
+                        user.username || user.firstName || user.id
+                    )}&canPublish=true`
+                );
+                const data = await res.json();
+                if (data.token) {
+                    joinBroadcast(data.token, true, user.username || user.firstName || user.id);
+                }
+            } catch (error) {
+                console.error("Failed to start broadcast:", error);
+            } finally {
+                setIsStartingBroadcast(false);
+            }
+        }
     };
 
     if (isMinimized) {
@@ -127,6 +157,21 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
             </div>
 
             <div className="p-4 border-t border-[var(--color-border-primary)] shrink-0 flex flex-col gap-2">
+                <button
+                    onClick={handleToggleBroadcast}
+                    disabled={isStartingBroadcast}
+                    className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all border ${token
+                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                        : "bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border-[var(--color-border-primary)]"
+                        }`}
+                >
+                    {isStartingBroadcast ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-[var(--color-text-muted)]" />
+                    ) : (
+                        <Video className={`w-4 h-4 ${token ? "text-red-500" : "text-[var(--color-text-muted)]"}`} />
+                    )}
+                    {token ? "Stop Broadcast" : "Start Broadcast"}
+                </button>
                 <button
                     onClick={() => useWhiteboardStore.getState().open()}
                     className="w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"
