@@ -74,14 +74,89 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
 
     const dropdownClasses = isTop
         ? "w-2/3 left-[50%] translate-x-[-50%] p-4 flex backdrop-blur-md bg-[var(--color-card)]/90 shadow-lg max-h-[400px] z-[1000] absolute top-16 rounded-lg border border-[var(--color-border-primary)]"
-        : "w-full flex-1 p-4 flex flex-col bg-[var(--color-card)] rounded-lg border border-[var(--color-border-primary)] overflow-hidden mt-2";
+        : "w-full flex-1 p-4 flex flex-col bg-[var(--color-card)] rounded-lg border border-[var(--color-border-primary)] overflow-hidden mb-2";
 
     const collapsedClasses = isTop
         ? "w-[43%] left-[50%] translate-x-[-50%] z-[1000] border border-[var(--color-border-primary)] border-t-0 py-0.5 px-2 flex backdrop-blur-md bg-[var(--color-card)]/90 shadow-md absolute top-15 rounded-b-lg cursor-pointer"
         : "hidden"; // Side view does not have this small dropdown tab
 
     return (
-        <div className={`flex flex-col ${isTop ? "static" : "h-full w-full"}`} ref={dropdownRef}>
+        <div className={`flex flex-col ${isTop ? "static" : "h-full w-full justify-end"}`} ref={dropdownRef}>
+
+
+            {/* Collapsed Top Tab */}
+            <AnimatePresence>
+                {isTop && chatmessages.length > 0 && !isDropdownOpen && (
+                    <motion.div
+                        layoutId="chat-container"
+                        transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 40
+                        }}
+                        className={collapsedClasses}
+                        onClick={() => setIsDropdownOpen(true)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2, delay: 0.4 }}
+                            className="w-full h-full flex items-center justify-between px-3"
+                        >
+                            <span className="text-[var(--color-text-primary)] text-sm font-light w-full text-start">chat</span>
+                            <span className="text-[var(--color-text-primary)] text-sm font-light w-full text-end flex justify-end items-center"><ChevronDown size={16} /></span>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Chat Messages */}
+            {chatmessages.length > 0 && (isDropdownOpen || !isTop) && (
+                <motion.div
+                    layout={isTop}
+                    layoutId={isTop ? "chat-container" : undefined}
+                    transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30
+                    }}
+                    className={dropdownClasses}
+                >
+                    <motion.div
+                        initial={isTop ? { opacity: 0 } : undefined}
+                        animate={isTop ? { opacity: 1 } : undefined}
+                        exit={isTop ? { opacity: 0 } : undefined}
+                        transition={{ duration: 0.15, delay: 0.1 }}
+                        ref={scrollRef}
+                        className="flex flex-col gap-3 w-full h-full overflow-y-auto pr-2 custom-scrollbar"
+                    >
+                        {chatmessages.map((msg: any, index: number) => {
+                            // Hide user messages if they are empty
+                            if (!msg.content && msg.role === "USER") return null;
+                            
+                            // For AI messages, only show the loading indicator if it's the very last message in the chat
+                            // Otherwise, if it's an old empty message, don't show anything
+                            if (!msg.content && msg.role !== "USER" && index !== chatmessages.length - 1) return null;
+                            
+                            return (
+                                <div key={msg.id} className={`flex ${msg.role === "USER" ? "justify-end" : "justify-start"}`}>
+                                    {msg.content ? (
+                                        <div className={`px-4 py-2 rounded-lg text-sm prose prose-sm max-w-none min-h-[38px] ${msg.role === "USER" ? "max-w-[80%] bg-[var(--color-primary)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]" : "bg-transparent w-full text-[var(--color-text-primary)]"}`}>
+                                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                        </div>
+                                    ) : (
+                                        <div className="flex h-[38px] items-center px-4 py-2">
+                                            <span className="animate-pulse bg-[var(--color-text-primary)]/60 inline-block h-2.5 w-2.5 rounded-full"></span>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </motion.div>
+                </motion.div>
+            )}
+
             {/* Input Area */}
             <div className={containerClasses}>
                 <div className="flex gap-1 items-center justify-between w-full">
@@ -137,64 +212,6 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                     </button>
                 </div>
             </div>
-
-            {/* Collapsed Top Tab */}
-            <AnimatePresence>
-                {isTop && chatmessages.length > 0 && !isDropdownOpen && (
-                    <motion.div
-                        layoutId="chat-container"
-                        transition={{
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 40
-                        }}
-                        className={collapsedClasses}
-                        onClick={() => setIsDropdownOpen(true)}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2, delay: 0.4 }}
-                            className="w-full h-full flex items-center justify-between px-3"
-                        >
-                            <span className="text-[var(--color-text-primary)] text-sm font-light w-full text-start">chat</span>
-                            <span className="text-[var(--color-text-primary)] text-sm font-light w-full text-end flex justify-end items-center"><ChevronDown size={16} /></span>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Chat Messages */}
-            {chatmessages.length > 0 && (isDropdownOpen || !isTop) && (
-                <motion.div
-                    layout={isTop}
-                    layoutId={isTop ? "chat-container" : undefined}
-                    transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30
-                    }}
-                    className={dropdownClasses}
-                >
-                    <motion.div
-                        initial={isTop ? { opacity: 0 } : undefined}
-                        animate={isTop ? { opacity: 1 } : undefined}
-                        exit={isTop ? { opacity: 0 } : undefined}
-                        transition={{ duration: 0.15, delay: 0.1 }}
-                        ref={scrollRef}
-                        className="flex flex-col gap-3 w-full h-full overflow-y-auto pr-2 custom-scrollbar"
-                    >
-                        {chatmessages.map((msg: any) => (
-                            <div key={msg.id} className={`flex ${msg.role === "USER" ? "justify-end" : "justify-start"}`}>
-                                <div className={`px-4 py-2 rounded-lg text-sm prose prose-sm max-w-none ${msg.role === "USER" ? "max-w-[80%] bg-[var(--color-primary)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]" : "bg-[var(--color-background)] w-full text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"}`}>
-                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                </div>
-                            </div>
-                        ))}
-                    </motion.div>
-                </motion.div>
-            )}
         </div>
     )
 }

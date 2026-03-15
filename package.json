@@ -18,6 +18,8 @@
     "@livekit/components-react": "^2.9.20",
     "@prisma/client": "^6.19.2",
     "@tanstack/react-query": "^5.90.21",
+    "@uploadthing/react": "^7.3.3",
+    "@xyflow/react": "^12.10.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.35.0",
     "livekit-client": "^2.17.2",
@@ -29,6 +31,7 @@
     "react-draggable": "^4.5.0",
     "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.5.0",
+    "uploadthing": "^7.7.4",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.29",
     "zustand": "^5.0.11"
@@ -43,5 +46,8 @@
     "prisma": "^6.19.2",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "effect": "^3.18.4"
   }
 }

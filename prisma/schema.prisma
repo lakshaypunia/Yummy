@@ -43,6 +43,7 @@ model User {
   joinedSpaces  SpaceMember[]    @relation("UserJoinedSpaces")
   chats         Chat[]
   p5Animations  P5Animation[]
+  documents     Document[]
 }
 
 enum SpaceTimeline {
@@ -111,6 +112,7 @@ model Space {
   pages                   Page[]
   chats                   Chat[]
   whiteboard              Whiteboard?
+  documents               Document[]
 
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -298,5 +300,25 @@ model P5Animation {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  key       String
+  size      Int
+  type      String
+  spaceId   String
+  authorId  String
+  
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spaceId])
+  @@index([authorId])
 }
 

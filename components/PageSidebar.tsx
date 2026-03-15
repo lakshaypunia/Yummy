@@ -6,19 +6,22 @@ import { ChevronLeft, ChevronRight, FileText, Plus, Loader2, Lock, Eye, Share2, 
 import Link from "next/link";
 import { useWhiteboardStore } from "@/hooks/useWhiteboardStore";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBroadcastStore } from "@/hooks/useBroadcastStore";
 import { useUser } from "@clerk/nextjs";
+import { SpaceDocumentsModal } from "@/components/SpaceDocumentsModal";
 
 interface PageSidebarProps {
     spaceId: string;
     initialPages: { id: string; title: string; visibility?: string }[];
+    isOwner?: boolean;
 }
 
-export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
+export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSidebarProps) {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
     const { triggerSidebarRefresh } = useRealtimeSpace();
@@ -49,22 +52,49 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
     const { token, joinBroadcast, leaveBroadcast } = useBroadcastStore();
     const { user } = useUser();
     const [isStartingBroadcast, setIsStartingBroadcast] = useState(false);
+    const { yDoc } = useRealtimeSpace();
+    const [isBroadcastActive, setIsBroadcastActive] = useState(false);
+
+    // Sync broadcast active state from Yjs
+    useEffect(() => {
+        if (!yDoc) return;
+        const broadcastMap = yDoc.getMap("broadcast-state");
+
+        const updateState = () => {
+            const active = broadcastMap.get("isActive") as boolean;
+            setIsBroadcastActive(!!active);
+        };
+
+        broadcastMap.observe(updateState);
+        updateState();
+
+        return () => {
+            broadcastMap.unobserve(updateState);
+        };
+    }, [yDoc]);
 
     const handleToggleBroadcast = async () => {
         if (token) {
             leaveBroadcast();
+            yDoc?.getMap("broadcast-state").set("isActive", false);
         } else {
             if (!user) return;
             setIsStartingBroadcast(true);
             try {
+                // The owner gets to publish immediately. Viewers join as viewers.
+                const publishState = isOwner;
+                
                 const res = await fetch(
                     `/api/livekit/get-token?room=space-${spaceId}&participantName=${encodeURIComponent(
                         user.username || user.firstName || user.id
-                    )}&canPublish=true`
+                    )}&canPublish=${publishState}`
                 );
                 const data = await res.json();
                 if (data.token) {
-                    joinBroadcast(data.token, true, user.username || user.firstName || user.id);
+                    if (publishState) {
+                        yDoc?.getMap("broadcast-state").set("isActive", true);
+                    }
+                    joinBroadcast(data.token, publishState, user.username || user.firstName || user.id);
                 }
             } catch (error) {
                 console.error("Failed to start broadcast:", error);
@@ -157,26 +187,49 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
             </div>
 
             <div className="p-4 border-t border-[var(--color-border-primary)] shrink-0 flex flex-col gap-2">
-                <button
-                    onClick={handleToggleBroadcast}
-                    disabled={isStartingBroadcast}
-                    className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all border ${token
-                        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                        : "bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border-[var(--color-border-primary)]"
-                        }`}
-                >
-                    {isStartingBroadcast ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-[var(--color-text-muted)]" />
-                    ) : (
-                        <Video className={`w-4 h-4 ${token ? "text-red-500" : "text-[var(--color-text-muted)]"}`} />
-                    )}
-                    {token ? "Stop Broadcast" : "Start Broadcast"}
-                </button>
+                {isBroadcastActive && !token ? (
+                    <button
+                        onClick={handleToggleBroadcast}
+                        disabled={isStartingBroadcast}
+                        className="w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 animate-pulse"
+                    >
+                        {isStartingBroadcast ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                        ) : (
+                            <Video className="w-4 h-4 text-blue-500" />
+                        )}
+                        Join Broadcast
+                    </button>
+                ) : (
+                    (isOwner || token) && (
+                        <button
+                            onClick={handleToggleBroadcast}
+                            disabled={isStartingBroadcast}
+                            className={`w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all border ${token
+                                ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                                : "bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border-[var(--color-border-primary)]"
+                                }`}
+                        >
+                            {isStartingBroadcast ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-[var(--color-text-muted)]" />
+                            ) : (
+                                <Video className={`w-4 h-4 ${token ? "text-red-500" : "text-[var(--color-text-muted)]"}`} />
+                            )}
+                            {token ? "Stop Broadcast" : "Start Broadcast"}
+                        </button>
+                    )
+                )}
                 <button
                     onClick={() => useWhiteboardStore.getState().open()}
                     className="w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"
                 >
                     <PenTool className="w-4 h-4 text-[var(--color-text-muted)]" /> Space Whiteboard
+                </button>
+                <button
+                    onClick={() => setIsDocumentsModalOpen(true)}
+                    className="w-full py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all bg-[var(--color-primary)] hover:bg-[var(--color-background)] text-[var(--color-text-primary)] border border-[var(--color-border-primary)]"
+                >
+                    <FileText className="w-4 h-4 text-[var(--color-text-muted)]" /> Space Documents
                 </button>
                 <button
                     onClick={handleShare}
@@ -192,6 +245,13 @@ export function PageSidebar({ spaceId, initialPages }: PageSidebarProps) {
                     )}
                 </button>
             </div>
+
+            <SpaceDocumentsModal
+                spaceId={spaceId}
+                isOpen={isDocumentsModalOpen}
+                onClose={() => setIsDocumentsModalOpen(false)}
+                userId={user?.id}
+            />
         </div>
     );
 }

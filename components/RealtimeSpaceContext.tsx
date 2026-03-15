@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 interface RealtimeSpaceContextType {
     triggerSidebarRefresh: () => void;
     syncStatus: "syncing" | "connected" | "disconnected";
+    yDoc: Y.Doc;
 }
 
 const RealtimeSpaceContext = createContext<RealtimeSpaceContextType | null>(null);
@@ -75,7 +76,7 @@ export function RealtimeSpaceProvider({
     }, [yDoc]);
 
     return (
-        <RealtimeSpaceContext.Provider value={{ triggerSidebarRefresh, syncStatus }}>
+        <RealtimeSpaceContext.Provider value={{ triggerSidebarRefresh, syncStatus, yDoc }}>
             {children}
         </RealtimeSpaceContext.Provider>
     );

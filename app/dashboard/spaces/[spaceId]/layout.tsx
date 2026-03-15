@@ -2,6 +2,7 @@ import { PageSidebar } from "@/components/PageSidebar";
 import { getPagesForSpace } from "@/lib/actions/page.actions";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { RealtimeSpaceProvider } from "@/components/RealtimeSpaceContext";
 import { SpaceWhiteboardOverlay } from "@/components/SpaceWhiteboardOverlay";
 import { LiveKitBroadcastOverlay } from "@/components/LiveKitBroadcastOverlay";
@@ -26,6 +27,9 @@ export default async function SpaceLayout({
     // Fetch initial pages for the sidebar
     const pages = await getPagesForSpace(spaceId);
 
+    const { userId } = await auth();
+    const isOwner = space.authorId === userId;
+
     return (
         <RealtimeSpaceProvider spaceId={spaceId}>
             <SpaceWhiteboardOverlay spaceId={spaceId} />
@@ -34,7 +38,11 @@ export default async function SpaceLayout({
 
             <div className="flex h-full w-full bg-white overflow-hidden">
                 {/* Contextual Secondary Sidebar just for Pages */}
-                <PageSidebar spaceId={spaceId} initialPages={pages.map((p: any) => ({ id: p.id, title: p.title, visibility: p.visibility }))} />
+                <PageSidebar 
+                    spaceId={spaceId} 
+                    initialPages={pages.map((p: any) => ({ id: p.id, title: p.title, visibility: p.visibility }))}
+                    isOwner={isOwner}
+                />
 
                 {/* Main Editor Content Area */}
                 <div className="flex-1 overflow-hidden relative">

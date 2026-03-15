@@ -24,7 +24,13 @@ export function InviteToBroadcastModal({ spaceId }: { spaceId: string }) {
             const data = await res.json();
 
             if (data.token) {
-                joinBroadcast(data.token, true, user.username || user.firstName || user.id);
+                // Must disconnect to upgrade permissions cleanly
+                const { leaveBroadcast, joinBroadcast } = useBroadcastStore.getState();
+                leaveBroadcast();
+                
+                setTimeout(() => {
+                    joinBroadcast(data.token, true, user.username || user.firstName || user.id);
+                }, 500);
             }
         } catch (error) {
             console.error("Failed to accept invite:", error);

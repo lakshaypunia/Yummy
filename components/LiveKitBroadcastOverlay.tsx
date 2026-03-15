@@ -15,6 +15,7 @@ import { ConnectionState, Participant, Track, RoomEvent } from "livekit-client";
 import { useBroadcastStore } from "@/hooks/useBroadcastStore";
 import { X, Mic, MicOff, Video, VideoOff, Users, UserPlus, UserMinus } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import { useRealtimeSpace } from "@/components/RealtimeSpaceContext";
 
 export function LiveKitBroadcastOverlay({ spaceId }: { spaceId: string }) {
     const { token, canPublish, participantName, leaveBroadcast, joinBroadcast } = useBroadcastStore();
@@ -23,23 +24,32 @@ export function LiveKitBroadcastOverlay({ spaceId }: { spaceId: string }) {
 
     const { user } = useUser();
 
-    // Auto-connect as a viewer when entering the space so they can receive invites
+
+
+    const { yDoc } = useRealtimeSpace();
+    const [isBroadcastActive, setIsBroadcastActive] = useState(false);
+
     useEffect(() => {
-        if (user && !token) {
-            fetch(`/api/livekit/get-token?room=space-${spaceId}&participantName=${encodeURIComponent(
-                user.username || user.firstName || user.id
-            )}&canPublish=false`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.token) {
-                        joinBroadcast(data.token, false, user.username || user.firstName || user.id);
-                    }
-                })
-                .catch(console.error);
-        }
-    }, [user, spaceId]);
+        if (!yDoc) return;
+        const broadcastMap = yDoc.getMap("broadcast-state");
+
+        const updateState = () => {
+            const active = broadcastMap.get("isActive") as boolean;
+            setIsBroadcastActive(!!active);
+        };
+
+        broadcastMap.observe(updateState);
+        updateState();
+
+        return () => {
+            broadcastMap.unobserve(updateState);
+        };
+    }, [yDoc]);
 
     if (!token) return null;
+
+    // Only render the overlay content if broadcast is actually active or we are publishers
+    if (!isBroadcastActive && !canPublish) return null;
 
     return (
         <LiveKitRoom
@@ -57,7 +67,12 @@ export function LiveKitBroadcastOverlay({ spaceId }: { spaceId: string }) {
                 setMicrophoneEnabled={setMicrophoneEnabled}
                 cameraEnabled={cameraEnabled}
                 setCameraEnabled={setCameraEnabled}
-                leave={leaveBroadcast}
+                leave={() => {
+                   if(canPublish) {
+                       yDoc?.getMap("broadcast-state").set("isActive", false);
+                   }
+                   leaveBroadcast();
+                }}
                 spaceId={spaceId}
                 user={user}
             />
