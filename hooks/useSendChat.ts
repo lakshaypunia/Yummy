@@ -18,6 +18,10 @@ interface UseStreamingChatOptions {
     onStreamEnd?: () => void;
     onVideoIntent?: (data: any) => Promise<void>;
     onAnimationIntent?: (data: any) => Promise<void>;
+    onDiagramIntent?: (data: any) => Promise<void>;
+    onP5Intent?: (data: any) => Promise<void>;
+    onReactFlowIntent?: (data: any) => Promise<void>;
+    onRagIntent?: (data: string) => Promise<void>;
     onPageUpdate?: (data: any) => Promise<void>;
 }
 
@@ -47,6 +51,7 @@ export function useStreamingChat({
     onDiagramIntent,
     onP5Intent,
     onReactFlowIntent,
+    onRagIntent,
     onPageUpdate
 }: UseStreamingChatOptions) {
     const queryClient = useQueryClient();
@@ -215,6 +220,23 @@ export function useStreamingChat({
                         return;
                     }
 
+                    if (resultData?.type === 'rag_create_success') {
+                        setIsStreaming(false);
+                        queryClient.setQueryData<Message[]>(
+                            ['chat-messages', chatId],
+                            (old = []) =>
+                                old.map((msg) =>
+                                    msg.id === aiMessageId
+                                        ? { ...msg, content: resultData.data, isComplete: true }
+                                        : msg
+                                )
+                        );
+                        if (onRagIntent) await onRagIntent(resultData.data);
+                        await refetch();
+                        onStreamEnd?.();
+                        return;
+                    }
+
                     // Handle standard orchestrator responses!
                     if (jsonData.success) {
                         queryClient.setQueryData<Message[]>(
@@ -305,7 +327,7 @@ export function useStreamingChat({
                 abortControllerRef.current = null;
             }
         },
-        [chatId, pageId, isStreaming, onError, onStreamStart, onStreamEnd, onVideoIntent, onAnimationIntent, onDiagramIntent, onP5Intent, onReactFlowIntent, queryClient, refetch, getToken]
+        [chatId, pageId, isStreaming, onError, onStreamStart, onStreamEnd, onVideoIntent, onAnimationIntent, onDiagramIntent, onP5Intent, onReactFlowIntent, onRagIntent, onPageUpdate, queryClient, refetch, getToken]
     );
 
     const cancelStream = useCallback(() => {

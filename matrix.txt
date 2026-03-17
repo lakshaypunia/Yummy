@@ -1,0 +1,32 @@
+--- RAG Query ---
+Timestamp: 2026-03-17T11:35:41.873Z
+Query: give me the summary of first chapter
+Cached Tokens: 0
+Prompt Tokens: 4174
+Candidates Tokens: 652
+Total Tokens: 6743
+
+--- RAG Query ---
+Timestamp: 2026-03-17T11:39:55.841Z
+Query: give me the summary of first chapter
+Cached Tokens: 0
+Prompt Tokens: 4174
+Candidates Tokens: 974
+Total Tokens: 7267
+
+--- RAG Query ---
+Timestamp: 2026-03-17T11:44:27.311Z
+Query: give me the summary of first chapter
+Cached Tokens: 0
+Prompt Tokens: 4174
+Candidates Tokens: 741
+Total Tokens: 6413
+
+--- RAG Query ---
+Timestamp: 2026-03-17T11:46:40.694Z
+Query: give me the summary of first chapter
+Cached Tokens: 0
+Prompt Tokens: 4174
+Candidates Tokens: 797
+Total Tokens: 7222
+

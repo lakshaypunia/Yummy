@@ -52,6 +52,7 @@ export default async function PageEditorView({
             <PageEditorLayout
                 pageId={page.id}
                 chatId={chatResult.chatId}
+                spaceId={spaceId}
                 initialTitle={page.title}
                 initialContent={page.blockJson ? (page.blockJson as any) : undefined}
                 editable={page.canEdit}

@@ -8,6 +8,7 @@ import { MessageSquare } from "lucide-react";
 interface PageEditorLayoutProps {
     pageId: string;
     chatId: string;
+    spaceId: string;
     initialTitle: string;
     initialContent?: any[];
     editable?: boolean;
@@ -16,6 +17,7 @@ interface PageEditorLayoutProps {
 export function PageEditorLayout({
     pageId,
     chatId,
+    spaceId,
     initialTitle,
     initialContent,
     editable = true,
@@ -77,6 +79,7 @@ export function PageEditorLayout({
                 <div className="flex-1 w-full relative overflow-hidden">
                     <EditorWrapper
                         pageId={pageId}
+                        spaceId={spaceId}
                         initialTitle={initialTitle}
                         initialContent={initialContent}
                         editable={editable}
