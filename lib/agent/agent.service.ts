@@ -82,6 +82,12 @@ export class AgentOrchestrator {
     } else if (content.includes('@diagram')) {
       actionType = 'diagram_create';
       cleanContent = content.replace('@diagram', '').trim();
+    } else if (content.includes('@p5')) {
+      actionType = 'p5_create';
+      cleanContent = content.replace('@p5', '').trim();
+    } else if (content.includes('@react-flow')) {
+      actionType = 'react_flow_create';
+      cleanContent = content.replace('@react-flow', '').trim();
     }
 
     const payload = {
@@ -108,6 +114,12 @@ export class AgentOrchestrator {
           break;
         case 'diagram_create': 
           result = await this.handleDiagram(payload);
+          break;
+        case 'p5_create':
+          result = await this.handleP5(payload);
+          break;
+        case 'react_flow_create':
+          result = await this.handleReactFlow(payload);
           break;
         case 'chat': 
         default: 
@@ -144,20 +156,51 @@ export class AgentOrchestrator {
     }
   }
 
-  // Handlers for specific intents
-  private static async handleAnimation(payload: any, userId: string) { 
+  private static async handleP5(payload: any) { 
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
-          systemInstruction: "You are an expert p5.js developer. Generate valid p5.js code based on the user's request. Output ONLY the raw p5.js code, no markdown fencing, no explanations, no HTML. Just the javascript code for the sketch."
+          systemInstruction: `You are an expert p5.js developer. Generate an interactive p5.js sketch based on the user's request. 
+          Output MUST be a complete, self-contained HTML file snippet containing the CDNs and script tags ready to be embedded in an iframe.
+          Do NOT include markdown fencing like \`\`\`html. Return ONLY the raw HTML string.`
         }
       });
-      return { type: 'p5', status: 'ready', content: response.text }; 
+      let rawHtml = response.text || "";
+      rawHtml = rawHtml.replace(/```html/g, '').replace(/```/g, '').trim();
+      return { type: 'p5_create_success', status: 'ready', data: rawHtml }; 
     } catch (error) {
-      console.error("Animation Error:", error);
-      return { type: 'p5', status: 'error', content: "Failed to generate animation" };
+      console.error("p5 Error:", error);
+      return { type: 'p5_create', status: 'error', data: "Failed to generate p5.js sketch" };
+    }
+  }
+
+  private static async handleReactFlow(payload: any) { 
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: payload.content }] }],
+        config: {
+          systemInstruction: `You are an expert React Flow developer. Generate a flowchart representing the user's request.
+          You must return ONLY a JSON object with two arrays: "nodes" and "edges".
+          - Nodes must follow the standard XYFlow format: { id: "1", position: { x: 0, y: 0 }, data: { label: "Text" } }
+          - Edges must follow the standard XYFlow format: { id: "e1-2", source: "1", target: "2" }
+          Make sure nodes are spaced out logically (e.g. at least 150px apart on the X or Y axis).
+          Do NOT include markdown fencing. Return ONLY parseable JSON.`,
+          responseMimeType: "application/json"
+        }
+      });
+      let flowJson;
+      try {
+        flowJson = JSON.parse(response.text || '{"nodes":[],"edges":[]}');
+      } catch (e) {
+        throw new Error("Failed to parse React Flow JSON");
+      }
+      return { type: 'react_flow_create_success', status: 'ready', data: flowJson }; 
+    } catch (error) {
+      console.error("React Flow Error:", error);
+      return { type: 'react_flow_create', status: 'error', data: "Failed to generate React Flow" };
     }
   }
 
@@ -393,16 +436,18 @@ export class AgentOrchestrator {
   private static async handleDiagram(payload: any) { 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-pro",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
-          systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
+          systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code specifically a 'flowchart TD' or 'graph TD' based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
         }
       });
-      return { type: 'mermaid', status: 'ready', content: response.text }; 
+      let rawMermaid = response.text || "";
+      rawMermaid = rawMermaid.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+      return { type: 'diagram_create_success', status: 'ready', data: rawMermaid }; 
     } catch (error) {
       console.error("Diagram Error:", error);
-      return { type: 'mermaid', status: 'error', content: "Failed to generate diagram" };
+      return { type: 'diagram_create', status: 'error', data: "Failed to generate diagram" };
     }
   }
 }

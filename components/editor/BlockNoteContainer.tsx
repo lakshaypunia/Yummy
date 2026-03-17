@@ -183,14 +183,56 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
             }
         };
 
+        const handleInsertDiagramBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { elements, files } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "excalidraw", props: { elements, files } }]);
+            } else {
+                editor.insertBlocks([{ type: "excalidraw", props: { elements, files } }], currentBlock, "after");
+            }
+        };
+
+        const handleInsertP5Block = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { code } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "p5_block", props: { code } }]);
+            } else {
+                editor.insertBlocks([{ type: "p5_block", props: { code } }], currentBlock, "after");
+            }
+        };
+
+        const handleInsertReactFlowBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { nodes, edges } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "react_flow", props: { nodes, edges } }]);
+            } else {
+                editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], currentBlock, "after");
+            }
+        };
+
         window.addEventListener('ai-blocks-updated', handleAiUpdate);
         window.addEventListener('insert-video-block', handleInsertVideoBlock);
         window.addEventListener('update-video-block', handleUpdateVideoBlock);
+        window.addEventListener('insert-diagram-block', handleInsertDiagramBlock);
+        window.addEventListener('insert-p5-block', handleInsertP5Block);
+        window.addEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
 
         return () => {
              window.removeEventListener('ai-blocks-updated', handleAiUpdate);
              window.removeEventListener('insert-video-block', handleInsertVideoBlock);
              window.removeEventListener('update-video-block', handleUpdateVideoBlock);
+             window.removeEventListener('insert-diagram-block', handleInsertDiagramBlock);
+             window.removeEventListener('insert-p5-block', handleInsertP5Block);
+             window.removeEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
         };
     }, [editor, setSaveStatus]);
 
