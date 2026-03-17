@@ -147,7 +147,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         const handleAiUpdate = (e: Event) => {
             const customEvent = e as CustomEvent;
             const { blocks } = customEvent.detail;
-            
+
             if (blocks && blocks.length > 0) {
                 console.log("Applying AI blocks to editor instance...");
                 try {
@@ -163,7 +163,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
             const customEvent = e as CustomEvent;
             const { blockId, isLoading } = customEvent.detail;
             const currentBlock = editor.getTextCursorPosition().block;
-            
+
             if (currentBlock.type === "paragraph" && !currentBlock.content) {
                 editor.replaceBlocks([currentBlock], [{ id: blockId, type: "video_block", props: { isLoading: isLoading ? "true" : "false", url: "" } }]);
             } else {
@@ -174,7 +174,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         const handleUpdateVideoBlock = (e: Event) => {
             const customEvent = e as CustomEvent;
             const { blockId, url, isLoading, error } = customEvent.detail;
-            
+
             try {
                 editor.updateBlock(blockId, {
                     type: "video_block",
@@ -230,6 +230,9 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         window.addEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
 
         return () => {
+            window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+            window.removeEventListener('insert-video-block', handleInsertVideoBlock);
+            window.removeEventListener('update-video-block', handleUpdateVideoBlock);
              window.removeEventListener('ai-blocks-updated', handleAiUpdate);
              window.removeEventListener('insert-video-block', handleInsertVideoBlock);
              window.removeEventListener('update-video-block', handleUpdateVideoBlock);
@@ -309,7 +312,7 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
         // Setup custom event listener for AI updates
         const eventWsUrl = wsUrl.replace("ws://", "ws://").replace("wss://", "wss://") + `/events/${pageId}`;
         const eventWs = new WebSocket(eventWsUrl);
-        
+
         eventWs.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -322,10 +325,10 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
                     // For now, if your custom sync-server broadcasts, we rely on the first connected client to apply it.
                     // TODO: Replace 'true' with a check against `userId === data.userId` when Clerk user is available
                     if (data.blocks && data.blocks.length > 0) {
-                       console.log("Received AI block update from sync-server, applying locally...");
-                       // To trigger a force update, we need to pass this down or raise an event the inner editor can catch.
-                       // For simplicity in this functional component, we will dispatch a custom DOM event.
-                       window.dispatchEvent(new CustomEvent('ai-blocks-updated', { detail: { blocks: data.blocks, userId: data.userId } }));
+                        console.log("Received AI block update from sync-server, applying locally...");
+                        // To trigger a force update, we need to pass this down or raise an event the inner editor can catch.
+                        // For simplicity in this functional component, we will dispatch a custom DOM event.
+                        window.dispatchEvent(new CustomEvent('ai-blocks-updated', { detail: { blocks: data.blocks, userId: data.userId } }));
                     }
                 }
             } catch (err) {
@@ -357,9 +360,9 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
 
     return (
         <div className="flex-1 flex flex-col h-full w-full bg-[var(--color-blockNote-background)] relative animate-in fade-in duration-500">
-            <div className="absolute top-4 right-8 z-10 text-xs font-medium px-2 py-1 rounded bg-[var(--color-secondary)]/80 text-[var(--color-text-muted)] backdrop-blur-sm shadow-sm pointer-events-none transition-all">
+            <div className="absolute top-2 right-2 z-10 text-xs font-medium px-2 py-1 rounded text-[var(--color-text-muted)] backdrop-blur-sm shadow-sm pointer-events-none transition-all">
                 {saveStatus === "saving" && "Saving..."}
-                {saveStatus === "saved" && <span className="text-green-600 font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Live</span>}
+                {saveStatus === "saved" && <span className="text-green-600 font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> </span>}
                 {saveStatus === "syncing" && <span className="text-orange-500">Reconnecting...</span>}
                 {saveStatus === "error" && <span className="text-red-500">Failed to save locally</span>}
             </div>

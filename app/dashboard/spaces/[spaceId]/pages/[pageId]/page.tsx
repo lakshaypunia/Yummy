@@ -34,7 +34,7 @@ export default async function PageEditorView({
 
     return (
         <div className="flex flex-col h-full w-full bg-white relative">
-            <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--color-border-primary)] bg-[var(--color-background)]">
+            {/* <div className="flex items-center justify-between px-6 py-3 border-b border-[var(--color-border-primary)] bg-[var(--color-background)]">
                 <div className="flex items-center gap-3">
                     <h1 className="text-xl font-bold text-[var(--color-text-primary)]">{page.title}</h1>
                     {!page.canEdit && (
@@ -47,11 +47,13 @@ export default async function PageEditorView({
                 {isAuthor && (
                     <PageVisibilityToggle pageId={page.id} initialVisibility={page.visibility} />
                 )}
-            </div>
+            </div> */}
 
             <PageEditorLayout
+                isAuthor={isAuthor}
                 pageId={page.id}
                 chatId={chatResult.chatId}
+                initialVisibility={page.visibility}
                 spaceId={spaceId}
                 initialTitle={page.title}
                 initialContent={page.blockJson ? (page.blockJson as any) : undefined}

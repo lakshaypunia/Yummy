@@ -4,12 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { EditorWrapper } from "@/components/editor/EditorWrapper";
 import Chat from "@/components/editor/Chat";
 import { MessageSquare } from "lucide-react";
+import { PageVisibilityToggle } from "../PageVisibilityToggle";
 
 interface PageEditorLayoutProps {
     pageId: string;
     chatId: string;
+    isAuthor: boolean;
     spaceId: string;
     initialTitle: string;
+    initialVisibility: string;
     initialContent?: any[];
     editable?: boolean;
 }
@@ -19,7 +22,9 @@ export function PageEditorLayout({
     chatId,
     spaceId,
     initialTitle,
+    isAuthor,
     initialContent,
+    initialVisibility,
     editable = true,
 }: PageEditorLayoutProps) {
     const [isSideChatMinimized, setIsSideChatMinimized] = useState(false);
@@ -53,12 +58,13 @@ export function PageEditorLayout({
 
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
-        
+
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
+
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -70,13 +76,20 @@ export function PageEditorLayout({
 
     return (
         <div ref={containerRef} className="flex h-full w-full relative overflow-hidden bg-[var(--color-background)]">
+
+
+
             {/* Main Content Area */}
-            <div 
-                className={`flex flex-col h-full ${isDragging ? '' : 'transition-all duration-300'}`} 
+            <div
+                className={`relative flex flex-col h-full ${isDragging ? '' : 'transition-all duration-300'}`}
                 style={{ width: !isSideChatMinimized ? `${100 - chatWidthPercent}%` : '100%' }}
             >
+
                 {/* Editor Container */}
                 <div className="flex-1 w-full relative overflow-hidden">
+                    {isAuthor && (
+                        <PageVisibilityToggle pageId={pageId} initialVisibility={initialVisibility} />
+                    )}
                     <EditorWrapper
                         pageId={pageId}
                         spaceId={spaceId}
@@ -89,7 +102,7 @@ export function PageEditorLayout({
 
             {/* Resizer Handle */}
             {!isSideChatMinimized && (
-                <div 
+                <div
                     className="absolute top-0 bottom-0 w-2 cursor-col-resize hover:bg-[var(--color-primary)]/20 active:bg-[var(--color-primary)]/30 transition-colors z-10 flex flex-col justify-center items-center group transform -translate-x-1/2"
                     style={{ left: `${100 - chatWidthPercent}%` }}
                     onMouseDown={handleMouseDown}
