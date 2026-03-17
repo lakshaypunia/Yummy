@@ -1,30 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --color-background: #e0e0e0;
-  --color-secondary: #f0f0f0;
-  --color-primary: #ffffff;
-  --color-highlight: #141414;
-  --color-text-highlight: #ffffff;
-  --color-text-primary: #141414;
-  --color-text-muted: #707070;
-  --color-card-background: #414141;
-  --color-border-primary: #acacac;
-  --color-blockNote-background: #ffffff;
+  /* Warm neutral light mode — stone/zinc foundation */
+  --color-background: #F4F3F0;
+  --color-secondary: #ECEAE6;
+  --color-primary: #FFFFFF;
+  --color-highlight: #18181B;
+  --color-text-highlight: #FFFFFF;
+  --color-text-primary: #18181B;
+  --color-text-muted: #78716C;
+  --color-card-background: #E7E5E1;
+  --color-border-primary: #D6D3CF;
+  --color-blockNote-background: #FFFFFF;
 }
 
 @layer theme {
   .dark {
-    --color-background: #141414;
-    --color-secondary: #272727;
-    --color-primary: #4f4f4f;
-    --color-highlight: #ffffff;
-    --color-text-highlight: #141414;
-    --color-text-primary: #ffffff;
-    --color-text-muted: #acacac;
-    --color-card-background: #414141;
-    --color-border-primary: #3a3a3a;
-    --color-blockNote-background: #1f1f1f;
+    /* Deep zinc dark mode — cool, clean, zero harshness */
+    --color-background: #111113;
+    --color-secondary: #1C1C1F;
+    --color-primary: #242428;
+    --color-highlight: #F4F3F0;
+    --color-text-highlight: #111113;
+    --color-text-primary: #EFEFEF;
+    --color-text-muted: #8C8C93;
+    --color-card-background: #2A2A2F;
+    --color-border-primary: #2E2E33;
+    --color-blockNote-background: #1C1C1F;
   }
 }
 
@@ -36,18 +38,14 @@
 body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Roboto", "Inter", sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Hide scrollbars globally */
 * {
   scrollbar-width: none;
-  /* Firefox */
   -ms-overflow-style: none;
-  /* IE/Edge */
 }
 
 *::-webkit-scrollbar {
   display: none;
-  /* Chrome/Safari/Webkit */
 }

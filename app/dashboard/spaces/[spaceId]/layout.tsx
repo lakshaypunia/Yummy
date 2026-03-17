@@ -17,16 +17,13 @@ export default async function SpaceLayout({
 }) {
     const { spaceId } = await params;
 
-    // Quick check if space exists to 404
     const space = await prisma.space.findUnique({
         where: { id: spaceId }
     });
 
     if (!space) return notFound();
 
-    // Fetch initial pages for the sidebar
     const pages = await getPagesForSpace(spaceId);
-
     const { userId } = await auth();
     const isOwner = space.authorId === userId;
 
@@ -36,16 +33,14 @@ export default async function SpaceLayout({
             <LiveKitBroadcastOverlay spaceId={spaceId} />
             <InviteToBroadcastModal spaceId={spaceId} />
 
-            <div className="flex h-full w-full bg-white overflow-hidden">
-                {/* Contextual Secondary Sidebar just for Pages */}
-                <PageSidebar 
-                    spaceId={spaceId} 
+            <div className="flex h-screen w-full overflow-hidden bg-[var(--color-blockNote-background)]">
+                <PageSidebar
+                    spaceId={spaceId}
                     initialPages={pages.map((p: any) => ({ id: p.id, title: p.title, visibility: p.visibility }))}
                     isOwner={isOwner}
                 />
-
-                {/* Main Editor Content Area */}
-                <div className="flex-1 overflow-hidden relative">
+                {/* ✅ flex-1 + min-w-0 so this column actually fills remaining space */}
+                <div className="flex-1 min-w-0 flex flex-col overflow-hidden relative">
                     {children}
                 </div>
             </div>

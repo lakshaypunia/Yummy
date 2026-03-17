@@ -2,71 +2,132 @@ import { UserButton } from "@clerk/nextjs";
 import { getSpaces } from "@/lib/actions/space.actions";
 import Link from "next/link";
 import { Folder } from "lucide-react";
-import { CreateSpaceForm } from "@/components/CreateSpaceForm";
+import { CreateSpaceModal } from "@/components/CreateSpaceForm";
 import { JoinSpaceModal } from "@/components/JoinSpaceModal";
 
 export default async function Dashboard() {
-    // Basic query to fetch real spaces
     const spaces = await getSpaces();
 
     return (
-        <div className="w-full h-full p-4 sm:p-6 lg:p-8 flex flex-col bg-[var(--color-background)]">
-            <div className="max-w-6xl w-full mx-auto">
-                <div className="flex flex-col gap-1 mb-8">
-                    <h2 className="text-3xl font-bold text-[var(--color-text-primary)] tracking-tight">Your Spaces</h2>
-                    <p className="text-[var(--color-text-muted)]">Create a new workspace or select an existing one to continue.</p>
-                </div>
+        <div className="w-full min-h-full bg-[var(--color-background)]">
+            <div className="max-w-5xl mx-auto px-6 py-8">
 
-                <div className="mb-8 flex flex-wrap items-end gap-0">
-                    <div>
-                        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Create New</h3>
-                        <CreateSpaceForm />
+                {/* Top bar */}
+                <div className="flex items-center justify-between mb-14 pb-6 border-b border-[var(--color-border-primary)]/40">
+                    <div className="flex items-center gap-2.5">
+                        <div className="grid grid-cols-2 gap-[3px] w-4 h-4">
+                            <span className="rounded-[2px] bg-[var(--color-text-primary)] opacity-80" />
+                            <span className="rounded-[2px] bg-[var(--color-text-primary)] opacity-40" />
+                            <span className="rounded-[2px] bg-[var(--color-text-primary)] opacity-40" />
+                            <span className="rounded-[2px] bg-[var(--color-text-primary)] opacity-20" />
+                        </div>
+                        <span className="text-sm font-medium text-[var(--color-text-primary)]">Workspaces</span>
                     </div>
-                    <JoinSpaceModal />
+                    <UserButton />
                 </div>
 
+                {/* Page heading */}
+                <div className="mb-6">
+                    <h1 className="text-[22px] font-medium text-[var(--color-text-primary)] tracking-[-0.3px] mb-1">
+                        Your spaces
+                    </h1>
+                    <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                        Manage your workspaces or create a new one to get started.
+                    </p>
+                </div>
+
+                {/* Actions */}
+                <div className="mb-6">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-muted)] mb-3">
+                        Actions
+                    </p>
+                    <div className="flex flex-wrap items-center gap-[10px]">
+                        <CreateSpaceModal />
+                        <div className="w-px h-6 bg-[var(--color-border-primary)]/30 flex-shrink-0" />
+                        <JoinSpaceModal />
+                    </div>
+                </div>
+
+                {/* Spaces grid */}
                 <div>
-                    <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Recent Spaces</h3>
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                            Recent spaces
+                        </p>
+                        {spaces.length > 0 && (
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-[var(--color-border-primary)]/40 bg-[var(--color-secondary)] text-[var(--color-text-muted)]">
+                                {spaces.length} space{spaces.length !== 1 ? "s" : ""}
+                            </span>
+                        )}
+                    </div>
 
                     {spaces.length === 0 ? (
-                        <div className="p-12 border-2 border-dashed border-[var(--color-border-primary)] rounded-2xl flex flex-col items-center justify-center text-center bg-[var(--color-primary)]/50">
-                            <div className="w-16 h-16 bg-[var(--color-secondary)] rounded-full flex items-center justify-center mb-4 shadow-inner">
-                                <Folder className="w-8 h-8 text-[var(--color-text-muted)]" />
+                        <div className="py-14 px-6 border border-dashed border-[var(--color-border-primary)]/60 rounded-xl flex flex-col items-center gap-3 text-center bg-[var(--color-secondary)]/50">
+                            <div className="w-10 h-10 rounded-lg bg-[var(--color-primary)] border border-[var(--color-border-primary)]/40 flex items-center justify-center mb-1">
+                                <Folder className="w-[14px] h-[14px] text-[var(--color-text-muted)]" />
                             </div>
-                            <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-1">No spaces found</h3>
-                            <p className="text-[var(--color-text-muted)] max-w-sm">You haven't created any workspaces yet. Create one above to get started.</p>
+                            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">No spaces yet</h3>
+                            <p className="text-sm text-[var(--color-text-muted)] max-w-[260px] leading-relaxed">
+                                You haven't created any workspaces yet. Create one above to get started.
+                            </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                             {spaces.map((space: any) => {
-                                // Default to the first page if it exists in the relation
                                 const rootPageId = space.pages?.[0]?.id || "new";
                                 const spaceHref = `/dashboard/spaces/${space.id}/pages/${rootPageId}`;
-
                                 return (
                                     <Link
                                         key={space.id}
                                         href={spaceHref}
-                                        className="group p-5 rounded-2xl border border-[var(--color-border-primary)] hover:border-[var(--color-highlight)] hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer bg-[var(--color-primary)] shadow-sm"
+                                        className="group flex flex-col gap-2 p-4 rounded-xl border border-[var(--color-border-primary)]/40 bg-[var(--color-primary)] hover:border-[var(--color-border-primary)] hover:bg-[var(--color-secondary)] transition-all duration-150 cursor-pointer"
                                     >
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="p-2.5 rounded-xl bg-[var(--color-secondary)] text-[var(--color-text-primary)] group-hover:bg-[var(--color-highlight)] group-hover:text-[var(--color-text-highlight)] transition-colors shadow-sm">
-                                                <Folder className="w-5 h-5" />
+                                        {/* Icon + Title row */}
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-lg bg-[var(--color-secondary)] border border-[var(--color-border-primary)]/40 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--color-primary)] transition-colors">
+                                                <Folder className="w-[14px] h-[14px] text-[var(--color-text-muted)] opacity-60" />
                                             </div>
-                                            <h4 className="font-semibold text-[var(--color-text-primary)] truncate flex-1" title={space.name}>
+                                            <h4 className="text-[13px] font-medium text-[var(--color-text-primary)] truncate">
                                                 {space.name}
                                             </h4>
                                         </div>
-                                        <p className="text-sm text-[var(--color-text-muted)] line-clamp-2 mt-auto">
+
+                                        {/* Description */}
+                                        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed line-clamp-2">
                                             {space.description || "No description provided."}
                                         </p>
+
+                                        {/* Meta row */}
+                                        <div className="flex items-center gap-[5px] mt-auto pt-2 border-t border-[var(--color-border-primary)]/30">
+                                            <span className="w-[5px] h-[5px] rounded-full bg-[var(--color-border-primary)] flex-shrink-0" />
+                                            <span className="text-[11px] text-[var(--color-text-muted)]">
+                                                {space.updatedAt
+                                                    ? `Updated ${formatRelativeTime(space.updatedAt)}`
+                                                    : "No recent activity"}
+                                            </span>
+                                        </div>
                                     </Link>
                                 );
                             })}
                         </div>
                     )}
                 </div>
+
             </div>
         </div>
     );
+}
+
+function formatRelativeTime(date: Date | string) {
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    const weeks = Math.floor(days / 7);
+
+    if (mins < 60) return `${mins}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days}d ago`;
+    return `${weeks}w ago`;
 }
