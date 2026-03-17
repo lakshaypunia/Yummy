@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         const { userId } = await auth();
         if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-        const { chatId, content } = await req.json();
+        const { chatId, content, pageId } = await req.json();
 
         // 1. Database Setup
         await prisma.message.create({
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
         // 2. Delegate to the Agent Orchestrator
         // This is the "Big Reveal" wait point
-        const result = await AgentOrchestrator.run(content, userId, aiMessage.id);
+        const result = await AgentOrchestrator.run(content, userId, aiMessage.id, pageId);
 
         // 3. Final DB Update
         await prisma.message.update({

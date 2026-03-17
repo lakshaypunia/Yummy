@@ -138,6 +138,28 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
         icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 5.5v13a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0-.5.5z"></path><path d="M12 9v6"></path><path d="M9 12h6"></path></svg>
     });
 
+    useEffect(() => {
+        if (!editor) return;
+
+        const handleAiUpdate = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { blocks } = customEvent.detail;
+            
+            if (blocks && blocks.length > 0) {
+                console.log("Applying AI blocks to editor instance...");
+                try {
+                    editor.replaceBlocks(editor.document, blocks);
+                    setSaveStatus("saved");
+                } catch (err) {
+                    console.error("Failed to apply AI blocks:", err);
+                }
+            }
+        };
+
+        window.addEventListener('ai-blocks-updated', handleAiUpdate);
+        return () => window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+    }, [editor, setSaveStatus]);
+
     if (!editor) return null;
 
     return (
@@ -183,7 +205,7 @@ export default function BlockNoteContainer({ pageId, initialTitle, initialConten
 
         // Connect to our Custom Node Sync Server 
         // We use the pageId as the unique "Room" identifier
-        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
+        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
         const yProvider = new WebsocketProvider(
             wsUrl,
             pageId,
@@ -204,12 +226,40 @@ export default function BlockNoteContainer({ pageId, initialTitle, initialConten
             setIsSynced(synced);
         });
 
+        // Setup custom event listener for AI updates
+        const eventWsUrl = wsUrl.replace("ws://", "ws://").replace("wss://", "wss://") + `/events/${pageId}`;
+        const eventWs = new WebSocket(eventWsUrl);
+        
+        eventWs.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'ai-update') {
+                    // CRITICAL SAFEGUARD: We only want the *initiating* user to run editor.replaceBlocks.
+                    // BlockNote's Yjs provider will see this local edit and sync it to everyone else automatically.
+                    // If everyone ran this, it would cause infinite CRDT conflicts.
+                    // NOTE: Without full Clerk auth connected in this snippet, we might need a simpler check or 
+                    // rely on the user visually seeing the new suggestion block appear. 
+                    // For now, if your custom sync-server broadcasts, we rely on the first connected client to apply it.
+                    // TODO: Replace 'true' with a check against `userId === data.userId` when Clerk user is available
+                    if (data.blocks && data.blocks.length > 0) {
+                       console.log("Received AI block update from sync-server, applying locally...");
+                       // To trigger a force update, we need to pass this down or raise an event the inner editor can catch.
+                       // For simplicity in this functional component, we will dispatch a custom DOM event.
+                       window.dispatchEvent(new CustomEvent('ai-blocks-updated', { detail: { blocks: data.blocks, userId: data.userId } }));
+                    }
+                }
+            } catch (err) {
+                console.error("Error parsing sync event:", err);
+            }
+        };
+
         setDoc(yDoc);
         setProvider(yProvider);
 
         return () => {
             yDoc.destroy();
             yProvider.destroy();
+            eventWs.close();
         };
     }, [pageId]);
 

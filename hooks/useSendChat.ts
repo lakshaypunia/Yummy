@@ -138,8 +138,27 @@ export function useStreamingChat({
                         await refetch();
                         return;
                     }
+
+                    // Handle standard orchestrator responses!
+                    if (jsonData.success) {
+                        queryClient.setQueryData<Message[]>(
+                            ['chat-messages', chatId],
+                            (old = []) =>
+                                old.map((msg) =>
+                                    msg.id === aiMessageId
+                                        ? { ...msg, content: jsonData.message, isComplete: true }
+                                        : msg
+                                )
+                        );
+                        await refetch();
+                        onStreamEnd?.();
+                        return; // VERY IMPORTANT: return so we don't try to stream!
+                    }
                 }
 
+                // If it's not JSON, OR if it's JSON but not one of the caught conditions above
+                // Note: since response.json() consumes the body, if it was JSON but unhandled, 
+                // getting a reader here would fail. The above `return` fixes the standard JSON case.
                 const reader = response.body?.getReader();
                 if (!reader) {
                     throw new Error('No reader available');

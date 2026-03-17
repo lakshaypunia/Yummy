@@ -16,6 +16,12 @@ export const AiUpdateBlock = createReactBlockSpec(
             newContent: {
                 default: "",
             },
+            newType: {
+                default: "paragraph",
+            },
+            newProps: {
+                default: "{}", // Stringified JSON to handle dynamic props like heading level
+            },
             targetBlockId: {
                 default: "",
             },
@@ -28,17 +34,24 @@ export const AiUpdateBlock = createReactBlockSpec(
     {
         render: (props) => {
             const { block, editor } = props;
-            const { originalContent, originalType, newContent, explanation } = block.props;
+            const { originalContent, originalType, newContent, newType, newProps, explanation } = block.props;
             const [status, setStatus] = useState<"pending" | "accepted" | "rejected">("pending");
 
             const handleAccept = () => {
                 setStatus("accepted");
 
                 try {
-                    // Restore to original block type with NEW content
+                    let parsedProps = {};
+                    try {
+                        parsedProps = JSON.parse(newProps);
+                    } catch (e) {
+                         // Default to empty if JSON parse fails
+                    }
+
+                    // Restore to the newly suggested block type with NEW content and NEW props
                     editor.updateBlock(block.id, {
-                        type: originalType as any,
-                        props: {},
+                        type: newType as any,
+                        props: parsedProps,
                         content: [{ type: "text", text: newContent, styles: {} }] as any
                     });
 
