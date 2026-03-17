@@ -11,16 +11,19 @@ import { savePageBlocks } from "@/lib/actions/page.actions";
 import { schema } from "@/components/blockNote/schema";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
+import { UploadButton } from "@/utils/uploadthing";
+import { cacheDocumentForPage } from "@/lib/actions/rag.actions";
 
 interface BlockNoteContainerProps {
     pageId: string;
+    spaceId: string;
     initialTitle: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialContent?: any[];
     editable?: boolean;
 }
 
-function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, provider, setSaveStatus }: BlockNoteContainerProps & { doc: Y.Doc, provider: WebsocketProvider, setSaveStatus: (status: "saved" | "saving" | "error" | "syncing") => void }) {
+function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, doc, provider, setSaveStatus }: BlockNoteContainerProps & { doc: Y.Doc, provider: WebsocketProvider, setSaveStatus: (status: "saved" | "saving" | "error" | "syncing") => void }) {
 
     const timeoutRef = useRef<NodeJS.Timeout>(null);
     const editableRef = useRef(editable);
@@ -183,14 +186,59 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
             }
         };
 
+        const handleInsertDiagramBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { elements, files } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "excalidraw", props: { elements, files } }]);
+            } else {
+                editor.insertBlocks([{ type: "excalidraw", props: { elements, files } }], currentBlock, "after");
+            }
+        };
+
+        const handleInsertP5Block = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { code } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "p5_block", props: { code } }]);
+            } else {
+                editor.insertBlocks([{ type: "p5_block", props: { code } }], currentBlock, "after");
+            }
+        };
+
+        const handleInsertReactFlowBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { nodes, edges } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "react_flow", props: { nodes, edges } }]);
+            } else {
+                editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], currentBlock, "after");
+            }
+        };
+
         window.addEventListener('ai-blocks-updated', handleAiUpdate);
         window.addEventListener('insert-video-block', handleInsertVideoBlock);
         window.addEventListener('update-video-block', handleUpdateVideoBlock);
+        window.addEventListener('insert-diagram-block', handleInsertDiagramBlock);
+        window.addEventListener('insert-p5-block', handleInsertP5Block);
+        window.addEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
 
         return () => {
             window.removeEventListener('ai-blocks-updated', handleAiUpdate);
             window.removeEventListener('insert-video-block', handleInsertVideoBlock);
             window.removeEventListener('update-video-block', handleUpdateVideoBlock);
+             window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+             window.removeEventListener('insert-video-block', handleInsertVideoBlock);
+             window.removeEventListener('update-video-block', handleUpdateVideoBlock);
+             window.removeEventListener('insert-diagram-block', handleInsertDiagramBlock);
+             window.removeEventListener('insert-p5-block', handleInsertP5Block);
+             window.removeEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
         };
     }, [editor, setSaveStatus]);
 
@@ -225,8 +273,9 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
     );
 }
 
-export default function BlockNoteContainer({ pageId, initialTitle, initialContent, editable = true }: BlockNoteContainerProps) {
+export default function BlockNoteContainer({ pageId, spaceId, initialTitle, initialContent, editable = true }: BlockNoteContainerProps) {
     const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | "syncing">("syncing");
+    const [isCaching, setIsCaching] = useState(false);
 
     // Yjs State
     const [doc, setDoc] = useState<Y.Doc>();
@@ -318,7 +367,47 @@ export default function BlockNoteContainer({ pageId, initialTitle, initialConten
                 {saveStatus === "error" && <span className="text-red-500">Failed to save locally</span>}
             </div>
 
+            {/* Context Caching Upload Button */}
+            <div className="absolute bottom-4 right-8 z-10 flex flex-col items-end gap-2 isolate pointer-events-auto">
+                {isCaching && <span className="text-xs text-[var(--color-primary)] font-medium animate-pulse px-2 py-1 rounded bg-[var(--color-card)]/80 backdrop-blur-md shadow-sm border border-[var(--color-border-primary)]">Caching Document to Gemini...</span>}
+                <UploadButton
+                    endpoint="spaceDocument"
+                    headers={{ "x-space-id": spaceId }}
+                    onClientUploadComplete={async (res) => {
+                        if (res && res[0]) {
+                            setIsCaching(true);
+                            try {
+                                const cacheRes = await cacheDocumentForPage(pageId, res[0].url);
+                                if (cacheRes.success) {
+                                    alert("Document successfully attached to context! You can now use @rag in chat.");
+                                } else {
+                                    alert("Failed to create context cache: " + cacheRes.error);
+                                }
+                            } catch(e) {
+                                console.error(e);
+                                alert("Error processing document cache.");
+                            } finally {
+                                setIsCaching(false);
+                            }
+                        }
+                    }}
+                    onUploadError={(error: Error) => {
+                        console.error("Upload error", error);
+                        alert(`ERROR! ${error.message}`);
+                    }}
+                    appearance={{
+                        button: "bg-[var(--color-primary)] text-white px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer shadow-sm hover:opacity-90 transition-opacity",
+                        container: "w-fit p-1 bg-[var(--color-card)]/80 backdrop-blur-md rounded-lg shadow-sm border border-[var(--color-border-primary)]",
+                        allowedContent: "hidden"
+                    }}
+                    content={{
+                        button: "Attach PDF for @rag"
+                    }}
+                />
+            </div>
+
             <InnerEditor
+                spaceId={spaceId}
                 pageId={pageId}
                 initialTitle={initialTitle}
                 initialContent={initialContent}

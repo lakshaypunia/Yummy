@@ -1,0 +1,5 @@
+FAILED with model: models/gemini-1.5-pro-002 - Error: {"name":"ApiError","status":404} - Message: {"error":{"code":404,"message":"models/gemini-1.5-pro-002 is not found for API version v1beta, or is not supported for createCachedContent. Call ListModels to see the list of available models and their supported methods.","status":"NOT_FOUND"}}
+
+FAILED with model: models/gemini-1.5-flash-002 - Error: {"name":"ApiError","status":404} - Message: {"error":{"code":404,"message":"models/gemini-1.5-flash-002 is not found for API version v1beta, or is not supported for createCachedContent. Call ListModels to see the list of available models and their supported methods.","status":"NOT_FOUND"}}
+
+FAILED with model: gemini-1.5-pro-002 - Error: {"name":"ApiError","status":404} - Message: {"error":{"code":404,"message":"models/gemini-1.5-pro-002 is not found for API version v1beta, or is not supported for createCachedContent. Call ListModels to see the list of available models and their supported methods.","status":"NOT_FOUND"}}

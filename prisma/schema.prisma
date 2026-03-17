@@ -176,6 +176,10 @@ model Page {
   isRead        Boolean   @default(false)
   visibility    PageVisibility @default(EDITABLE)
 
+  geminiCacheName String?
+  geminiFileUri   String?
+  cacheExpiresAt  DateTime?
+
   deletedAt     DateTime?
 
   parentPage    Page?     @relation("PageChildren", fields: [parentPageId], references: [id], onDelete: SetNull)

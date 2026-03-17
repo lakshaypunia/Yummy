@@ -82,6 +82,15 @@ export class AgentOrchestrator {
     } else if (content.includes('@diagram')) {
       actionType = 'diagram_create';
       cleanContent = content.replace('@diagram', '').trim();
+    } else if (content.includes('@p5')) {
+      actionType = 'p5_create';
+      cleanContent = content.replace('@p5', '').trim();
+    } else if (content.includes('@react-flow')) {
+      actionType = 'react_flow_create';
+      cleanContent = content.replace('@react-flow', '').trim();
+    } else if (content.includes('@rag')) {
+      actionType = 'rag_create';
+      cleanContent = content.replace('@rag', '').trim();
     }
 
     const payload = {
@@ -109,6 +118,15 @@ export class AgentOrchestrator {
         case 'diagram_create': 
           result = await this.handleDiagram(payload);
           break;
+        case 'p5_create':
+          result = await this.handleP5(payload);
+          break;
+        case 'react_flow_create':
+          result = await this.handleReactFlow(payload);
+          break;
+        case 'rag_create':
+          result = await this.handleRag(payload);
+          break;
         case 'chat': 
         default: 
           result = await this.handleChat(payload);
@@ -122,7 +140,7 @@ export class AgentOrchestrator {
     // 3. FINALIZE DB RECORD
 
     return {
-      message: actionType === 'chat' ? ((result as any).message || cleanContent) : `Processing ${actionType} intent`,
+      message: (result as any)?.message || `Processing ${actionType} intent`,
       actions: [{ type: actionType as any, payload }],
       data: [result]
     };
@@ -144,20 +162,55 @@ export class AgentOrchestrator {
     }
   }
 
-  // Handlers for specific intents
-  private static async handleAnimation(payload: any, userId: string) { 
+  private static async handleAnimation(payload: any, userId: string) {
+    return { type: 'animation_create', status: 'error', message: 'Not implemented' };
+  }
+
+  private static async handleP5(payload: any) { 
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: [{ role: "user", parts: [{ text: payload.content }] }],
+        config: {
+          systemInstruction: `You are an expert p5.js developer. Generate an interactive p5.js sketch based on the user's request. 
+          Output MUST be a complete, self-contained HTML file snippet containing the CDNs and script tags ready to be embedded in an iframe.
+          Do NOT include markdown fencing like \`\`\`html. Return ONLY the raw HTML string.`
+        }
+      });
+      let rawHtml = response.text || "";
+      rawHtml = rawHtml.replace(/```html/g, '').replace(/```/g, '').trim();
+      return { type: 'p5_create_success', status: 'ready', data: rawHtml }; 
+    } catch (error) {
+      console.error("p5 Error:", error);
+      return { type: 'p5_create', status: 'error', data: "Failed to generate p5.js sketch" };
+    }
+  }
+
+  private static async handleReactFlow(payload: any) { 
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
-          systemInstruction: "You are an expert p5.js developer. Generate valid p5.js code based on the user's request. Output ONLY the raw p5.js code, no markdown fencing, no explanations, no HTML. Just the javascript code for the sketch."
+          systemInstruction: `You are an expert React Flow developer. Generate a flowchart representing the user's request.
+          You must return ONLY a JSON object with two arrays: "nodes" and "edges".
+          - Nodes must follow the standard XYFlow format: { id: "1", position: { x: 0, y: 0 }, data: { label: "Text" } }
+          - Edges must follow the standard XYFlow format: { id: "e1-2", source: "1", target: "2" }
+          Make sure nodes are spaced out logically (e.g. at least 150px apart on the X or Y axis).
+          Do NOT include markdown fencing. Return ONLY parseable JSON.`,
+          responseMimeType: "application/json"
         }
       });
-      return { type: 'p5', status: 'ready', content: response.text }; 
+      let flowJson;
+      try {
+        flowJson = JSON.parse(response.text || '{"nodes":[],"edges":[]}');
+      } catch (e) {
+        throw new Error("Failed to parse React Flow JSON");
+      }
+      return { type: 'react_flow_create_success', status: 'ready', data: flowJson }; 
     } catch (error) {
-      console.error("Animation Error:", error);
-      return { type: 'p5', status: 'error', content: "Failed to generate animation" };
+      console.error("React Flow Error:", error);
+      return { type: 'react_flow_create', status: 'error', data: "Failed to generate React Flow" };
     }
   }
 
@@ -393,16 +446,75 @@ export class AgentOrchestrator {
   private static async handleDiagram(payload: any) { 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
-          systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
+          systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code specifically a 'flowchart TD' or 'graph flowTD' based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
         }
       });
-      return { type: 'mermaid', status: 'ready', content: response.text }; 
+      let rawMermaid = response.text || "";
+      rawMermaid = rawMermaid.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+      return { type: 'diagram_create_success', status: 'ready', data: rawMermaid }; 
     } catch (error) {
       console.error("Diagram Error:", error);
-      return { type: 'mermaid', status: 'error', content: "Failed to generate diagram" };
+      return { type: 'diagram_create', status: 'error', data: "Failed to generate diagram" };
+    }
+  }
+
+  private static async handleRag(payload: any) {
+    try {
+      if (!payload.pageId) {
+        return { type: 'chat', status: 'error', message: "No active page found." };
+      }
+
+      const page = await prisma.page.findUnique({ where: { id: payload.pageId } });
+      // @ts-ignore
+      if (!page || !page.geminiFileUri) {
+         // Return a helpful message so the user knows they need to attach a PDF first.
+         return { type: 'chat', status: 'ready', message: "I couldn't find an attached PDF Document for this page! Please attach a document first using the knowledge base." };
+      }
+
+      let contentParts: any[] = [
+          // @ts-ignore
+          { fileData: { fileUri: page.geminiFileUri, mimeType: "application/pdf" } },
+          { text: payload.content }
+      ];
+
+      let reqConfig: any = {
+          systemInstruction: "You are an expert assistant. Answer the user's query based ONLY on the attached cached document. If the answer is not in the document, reply that you don't know.",
+      };
+
+      // @ts-ignore
+      if (page.geminiCacheName) {
+          // @ts-ignore
+          reqConfig.cachedContent = page.geminiCacheName;
+          
+          // If using the explicit Cache API, the file data shouldn't be re-passed in the contents array.
+          contentParts = [{ text: payload.content }];
+      }
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: contentParts }],
+        config: reqConfig
+      });
+
+      const answer = response.text || "";
+      const usageMetadata = response.usageMetadata;
+      
+      const metricsLog = `--- RAG Query ---\nTimestamp: ${new Date().toISOString()}\nQuery: ${payload.content}\nCached Tokens: ${usageMetadata?.cachedContentTokenCount || 0}\nPrompt Tokens: ${usageMetadata?.promptTokenCount || 0}\nCandidates Tokens: ${usageMetadata?.candidatesTokenCount || 0}\nTotal Tokens: ${usageMetadata?.totalTokenCount || 0}\n\n`;
+      
+      const fs = require('fs');
+      const path = require('path');
+      const logPath = path.join(process.cwd(), 'matrix.txt');
+      fs.appendFileSync(logPath, metricsLog);
+      
+      console.log("[RAG] Wrote matrix checker tokens to matrix.txt");
+
+      return { type: 'rag_create_success', status: 'ready', data: answer, message: answer };
+    } catch (error) {
+      console.error("RAG Error:", error);
+      return { type: 'rag_create', status: 'error', data: "Failed to query the cached document." };
     }
   }
 }

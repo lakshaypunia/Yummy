@@ -82,6 +82,48 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
         }
     }
 
+    const handleDiagramIntent = async (mermaidCode: string) => {
+        try {
+            // Dynamically import the parser to avoid SSR issues
+            const { parseMermaidToExcalidraw } = await import("@excalidraw/mermaid-to-excalidraw");
+            
+            // Parse the mermaid output into Excalidraw elements
+            const { elements, files } = await parseMermaidToExcalidraw(mermaidCode);
+
+            // Dispatch event to Editor with JSON strings of elements
+            window.dispatchEvent(
+                new CustomEvent("insert-diagram-block", {
+                    detail: { 
+                        elements: JSON.stringify(elements),
+                        files: files ? JSON.stringify(files) : null
+                    }
+                })
+            );
+        } catch (error) {
+            console.error("Failed to parse Mermaid to Excalidraw:", error);
+            // Fallback: Could dispatch a text block with an error message here
+        }
+    };
+
+    const handleP5Intent = async (htmlCode: string) => {
+        window.dispatchEvent(
+            new CustomEvent("insert-p5-block", {
+                detail: { code: htmlCode }
+            })
+        );
+    };
+
+    const handleReactFlowIntent = async (flowData: any) => {
+        window.dispatchEvent(
+            new CustomEvent("insert-react-flow-block", {
+                detail: { 
+                    nodes: JSON.stringify(flowData.nodes || []),
+                    edges: JSON.stringify(flowData.edges || [])
+                }
+            })
+        );
+    };
+
     const {
         messages: chatmessages,
         isStreaming,
@@ -89,7 +131,10 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     } = useStreamingChat({
         chatId,
         pageId,
-        onVideoIntent: handleVideoIntent
+        onVideoIntent: handleVideoIntent,
+        onDiagramIntent: handleDiagramIntent,
+        onP5Intent: handleP5Intent,
+        onReactFlowIntent: handleReactFlowIntent
     });
 
     // Auto-scroll logic remains to keep the latest messages in view

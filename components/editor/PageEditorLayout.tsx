@@ -10,6 +10,7 @@ interface PageEditorLayoutProps {
     pageId: string;
     chatId: string;
     isAuthor: boolean;
+    spaceId: string;
     initialTitle: string;
     initialVisibility: string;
     initialContent?: any[];
@@ -19,6 +20,7 @@ interface PageEditorLayoutProps {
 export function PageEditorLayout({
     pageId,
     chatId,
+    spaceId,
     initialTitle,
     isAuthor,
     initialContent,
@@ -90,6 +92,7 @@ export function PageEditorLayout({
                     )}
                     <EditorWrapper
                         pageId={pageId}
+                        spaceId={spaceId}
                         initialTitle={initialTitle}
                         initialContent={initialContent}
                         editable={editable}

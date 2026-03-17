@@ -16,14 +16,16 @@ const Editor = dynamic(() => import("@/components/editor/BlockNoteContainer"), {
 
 export function EditorWrapper({
     pageId,
+    spaceId,
     initialTitle,
     initialContent,
     editable = true
 }: {
     pageId: string,
+    spaceId: string,
     initialTitle: string,
     initialContent?: any[],
     editable?: boolean
 }) {
-    return <Editor pageId={pageId} initialTitle={initialTitle} initialContent={initialContent} editable={editable} />;
+    return <Editor pageId={pageId} spaceId={spaceId} initialTitle={initialTitle} initialContent={initialContent} editable={editable} />;
 }

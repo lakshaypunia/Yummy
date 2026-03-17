@@ -54,6 +54,7 @@ export default async function PageEditorView({
                 pageId={page.id}
                 chatId={chatResult.chatId}
                 initialVisibility={page.visibility}
+                spaceId={spaceId}
                 initialTitle={page.title}
                 initialContent={page.blockJson ? (page.blockJson as any) : undefined}
                 editable={page.canEdit}
