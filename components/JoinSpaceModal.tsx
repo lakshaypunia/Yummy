@@ -16,16 +16,15 @@ export function JoinSpaceModal() {
         e.preventDefault();
         setError("");
 
-        // Basic cleanup of input in case they pasted a full URL
         let finalId = spaceId.trim();
         if (finalId.includes("/join/")) {
             finalId = finalId.split("/join/")[1];
         } else if (finalId.includes("/spaces/")) {
-            finalId = finalId.split("/spaces/")[1].split("/")[0]; // extract ID from URL
+            finalId = finalId.split("/spaces/")[1].split("/")[0];
         }
 
         if (!finalId) {
-            setError("Please enter a valid Space ID");
+            setError("Please enter a valid space ID");
             return;
         }
 
@@ -42,65 +41,121 @@ export function JoinSpaceModal() {
         }
     };
 
+    const close = () => { setIsOpen(false); setSpaceId(""); setError(""); };
+
     return (
         <>
+            {/* Trigger Button (Matches secondary .btn) */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="mt-4 px-5 py-2.5 ml-2 border border-[var(--color-border-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-primary)] rounded-lg flex items-center gap-2 transition-colors font-medium shadow-sm"
+                className="
+                    inline-flex items-center gap-[7px] px-[14px] h-[36px]
+                    rounded-md text-[13px] font-medium
+                    bg-[var(--color-background)] text-[var(--color-text-primary)]
+                    border border-[var(--color-border-primary)]
+                    hover:bg-[var(--color-secondary)]
+                    transition-all duration-120
+                    cursor-pointer
+                "
             >
-                <Link2 className="w-4 h-4" /> Join Space
+                <Link2 className="w-3.5 h-3.5 opacity-75" strokeWidth={2} />
+                Join with code
             </button>
 
+            {/* Modal */}
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                    <div className="bg-[var(--color-background)] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[var(--color-border-primary)] animate-in fade-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-center p-5 border-b border-[var(--color-border-primary)]">
-                            <h3 className="text-xl font-bold text-[var(--color-text-primary)]">Join a Space</h3>
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/30 backdrop-blur-[2px]"
+                    onClick={(e) => e.target === e.currentTarget && close()}
+                >
+                    <div className="
+                        bg-[var(--color-background)] w-full max-w-sm rounded-xl overflow-hidden
+                        border border-[var(--color-border-primary)]
+                        shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+                        animate-in fade-in zoom-in-95 duration-150
+                    ">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border-primary)]">
+                            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">
+                                Join a space
+                            </h3>
                             <button
-                                onClick={() => setIsOpen(false)}
-                                className="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] rounded-full hover:bg-[var(--color-primary)] transition-colors"
+                                onClick={close}
+                                className="
+                                    w-6 h-6 rounded-md flex items-center justify-center
+                                    text-[var(--color-text-muted)]
+                                    hover:text-[var(--color-text-primary)]
+                                    hover:bg-[var(--color-secondary)]
+                                    transition-colors duration-150
+                                "
                             >
-                                <X className="w-5 h-5" />
+                                <X className="w-3.5 h-3.5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6">
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-2">
-                                    Space ID or Invite Link
+                        {/* Body */}
+                        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs text-[var(--color-text-muted)]">
+                                    Space ID or invite link
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-                                    className="w-full px-4 py-3 rounded-xl border border-[var(--color-border-primary)] bg-[var(--color-primary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-highlight)]/20 focus:border-[var(--color-highlight)] transition-all"
+                                    placeholder="550e8400-e29b-41d4-a716..."
+                                    className="
+                                        h-9 px-3 rounded-lg text-sm
+                                        border border-[var(--color-border-primary)]
+                                        bg-[var(--color-primary)]
+                                        text-[var(--color-text-primary)]
+                                        placeholder:text-[var(--color-text-muted)]
+                                        focus:outline-none focus:border-[var(--color-text-muted)]
+                                        transition-colors duration-150
+                                        disabled:opacity-50
+                                    "
                                     value={spaceId}
-                                    onChange={(e) => {
-                                        setSpaceId(e.target.value);
-                                        setError("");
-                                    }}
+                                    onChange={(e) => { setSpaceId(e.target.value); setError(""); }}
                                     disabled={isLoading}
                                     autoFocus
                                 />
                                 {error && (
-                                    <p className="text-red-500 text-sm mt-2">{error}</p>
+                                    <p className="text-xs text-red-500 mt-0.5">{error}</p>
                                 )}
                             </div>
 
-                            <div className="flex gap-3 mt-8">
+                            {/* Footer actions */}
+                            <div className="flex gap-2 pt-1">
                                 <button
                                     type="button"
-                                    onClick={() => setIsOpen(false)}
-                                    className="flex-1 px-4 py-2.5 border border-[var(--color-border-primary)] text-[var(--color-text-primary)] hover:bg-[var(--color-primary)] rounded-xl font-medium transition-colors"
+                                    onClick={close}
                                     disabled={isLoading}
+                                    className="
+                                        flex-1 h-9 rounded-lg text-sm font-medium
+                                        border border-[var(--color-border-primary)]
+                                        bg-[var(--color-primary)]
+                                        text-[var(--color-text-primary)]
+                                        hover:bg-[var(--color-secondary)]
+                                        disabled:opacity-40
+                                        transition-colors duration-150
+                                    "
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={!spaceId.trim() || isLoading}
-                                    className="flex-1 px-4 py-2.5 bg-[var(--color-highlight)] text-[var(--color-text-highlight)] rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium shadow-sm transition-opacity"
+                                    className="
+                                        flex-1 h-9 rounded-lg text-sm font-medium
+                                        flex items-center justify-center
+                                        bg-[var(--color-text-primary)] text-[var(--color-background)]
+                                        hover:opacity-85 active:opacity-75 active:scale-[0.98]
+                                        disabled:opacity-35 disabled:cursor-not-allowed
+                                        transition-all duration-150
+                                    "
                                 >
-                                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Join Space"}
+                                    {isLoading
+                                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                        : "Join space"
+                                    }
                                 </button>
                             </div>
                         </form>
