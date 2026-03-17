@@ -14,7 +14,7 @@ export const processIntent = async (userMessage: string): Promise<AIResponse> =>
     try {
         const response = await ai.models.generateContent({
             // Note: Use gemini-2.5-flash as available
-            model: "gemini-2.5-flash",
+            model: "gemini-2.0-flash",
             contents: [{ role: "user", parts: [{ text: userMessage }] }],
             config: {
                 systemInstruction: "Classify intent into: 'page_update', 'video_create', 'animation_create', or 'chat'. \n\n'video_create': User explicitly asks to generate/create/make a video using Manim/Python. \n'animation_create': User explicitly asks to generate/create/make an interactive animation/sketch using p5.js/code. \n'page_update': User wants to edit/change/update the content of the current document/page. \n'chat': General conversation or questions. \n\nReturn ONLY JSON.",

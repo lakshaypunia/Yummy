@@ -183,8 +183,9 @@ export default function BlockNoteContainer({ pageId, initialTitle, initialConten
 
         // Connect to our Custom Node Sync Server 
         // We use the pageId as the unique "Room" identifier
+        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
         const yProvider = new WebsocketProvider(
-            "ws://localhost:1234",
+            wsUrl,
             pageId,
             yDoc
         );

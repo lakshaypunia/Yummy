@@ -36,8 +36,9 @@ export function RealtimeSpaceProvider({
 
     useEffect(() => {
         // We connect to a special "Room" just for the Space's global events
+        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
         const wsProvider = new WebsocketProvider(
-            "ws://localhost:1234",
+            wsUrl,
             `space-${spaceId}`,
             yDoc
         );
