@@ -125,17 +125,39 @@ export function useStreamingChat({
                 if (contentType && contentType.includes("application/json")) {
                     const jsonData = await response.json();
 
-                    if (jsonData.type === 'video_create_success' && onVideoIntent) {
+                    const resultData = jsonData.data?.[0];
+
+                    if (resultData?.type === 'video_create_success' && onVideoIntent) {
                         setIsStreaming(false);
-                        await onVideoIntent(jsonData.data);
+                        queryClient.setQueryData<Message[]>(
+                            ['chat-messages', chatId],
+                            (old = []) =>
+                                old.map((msg) =>
+                                    msg.id === aiMessageId
+                                        ? { ...msg, content: jsonData.message, isComplete: true }
+                                        : msg
+                                )
+                        );
+                        await onVideoIntent(resultData.data);
                         await refetch();
+                        onStreamEnd?.();
                         return;
                     }
 
-                    if (jsonData.type === 'animation_create_success' && onAnimationIntent) {
+                    if (resultData?.type === 'animation_create_success' && onAnimationIntent) {
                         setIsStreaming(false);
-                        await onAnimationIntent(jsonData.data);
+                        queryClient.setQueryData<Message[]>(
+                            ['chat-messages', chatId],
+                            (old = []) =>
+                                old.map((msg) =>
+                                    msg.id === aiMessageId
+                                        ? { ...msg, content: jsonData.message, isComplete: true }
+                                        : msg
+                                )
+                        );
+                        await onAnimationIntent(resultData.data);
                         await refetch();
+                        onStreamEnd?.();
                         return;
                     }
 

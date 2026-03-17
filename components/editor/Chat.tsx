@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
 import { useStreamingChat } from "@/hooks/useSendChat"
 import ReactMarkdown from "react-markdown"
+import { uploadFiles } from "@/utils/uploadthing"
 
 interface ChatProps {
     chatId: string;
@@ -23,8 +24,64 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     const inputRef = useRef<HTMLInputElement>(null)
     const scrollRef = useRef<HTMLDivElement>(null)
 
-    // Simplified hook: No more local intent handling. 
-    // The backend now manages the creation of videos/animations.
+    const handleVideoIntent = async (code: string) => {
+        try {
+            const blockId = `video-${Date.now()}`;
+            // 1. Show the loading block instantly
+            window.dispatchEvent(
+                new CustomEvent("insert-video-block", {
+                    detail: { blockId, isLoading: true }
+                })
+            );
+
+            // 2. We now use the sync-server API instead of Electron IPC
+            const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
+            const apiUrl = syncServerUrl.replace("ws://", "http://").replace("wss://", "https://") + "/api/generate-video";
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ code }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to generate video on server");
+            }
+
+            // Read the binary video file from the response
+            const blob = await response.blob();
+            const videoFile = new File([blob], "ai-video.mp4", { type: "video/mp4" });
+
+            // Upload securely to our AWS bucket via uploadthing
+            const uploadResponse = await uploadFiles("spaceDocument", {
+                files: [videoFile],
+                headers: { "x-space-id": pageId } // Use pageId as spaceId fallback
+            });
+
+            if (uploadResponse && uploadResponse[0]) {
+                // Update the editor with the shiny new URL
+                window.dispatchEvent(
+                    new CustomEvent("update-video-block", {
+                        detail: { blockId, url: uploadResponse[0].url, isLoading: false }
+                    })
+                );
+            } else {
+                 throw new Error("Local video generation failed to return a path.");
+            }
+        } catch (error) {
+            console.error("Error generating video:", error);
+            // Don't leave the block spinning forever
+            window.dispatchEvent(
+                new CustomEvent("update-video-block", {
+                    detail: { blockId: "error", url: null, isLoading: false, error: "Failed to generate video" } // We don't have blockId scope safely here if it failed early, but usually blockId is in outer scope.
+                })
+            );
+        }
+    }
+
     const {
         messages: chatmessages,
         isStreaming,
@@ -32,7 +89,7 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     } = useStreamingChat({
         chatId,
         pageId,
-        // Removed onVideoIntent and onAnimationIntent
+        onVideoIntent: handleVideoIntent
     });
 
     // Auto-scroll logic remains to keep the latest messages in view

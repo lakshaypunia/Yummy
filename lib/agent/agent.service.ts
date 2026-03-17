@@ -163,17 +163,115 @@ export class AgentOrchestrator {
 
   private static async handleVideo(payload: any) { 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      // Step 1: Refine the prompt to expand on creativity and strict constraints
+      const refineSystemPrompt = `
+        You are an expert prompt engineer specializing in creative coding ('Manim/Python'}).
+        Your goal is to take a simple user request and expand it into a DETAILED, high-quality prompt that will be used by another AI to generate the actual code.
+
+        Detailed Requirements for the Expanded Prompt:
+        1. **Clarity & Detail**: Expand concepts, describe visual elements, animations, and behaviors in depth.
+        2. **Resource Efficiency**: 
+           - **CRITICAL**: Keep the visualization efficient to avoid timeouts. 
+           - **Maximum Animations**: Limit the total number of animations to **20 or fewer**.
+           - **3D Geometry**: Avoid high-resolution 3D objects. If using \`Sphere\`, explicitly set low resolution (e.g., \`resolution=(12, 12)\`) or use \`Dot\` if possible. Avoid rendering hundreds of complex objects simultaneously.
+        3. **Aesthetics & Colors**: Suggest a modern, professional color palette. 
+           - **CRITICAL**: Suggest colors using HEX CODES (e.g., #007bff) or very standard names (e.g., "blue", "red"). 
+           - **Avoid** names like "light blue" or "dark grey" which might not be defined as constants in the target library.
+        4. **Interactivity (for p5.js)**: Explicitly mention how users should be able to interact (mouse, keyboard).
+        5. **No Code**: Do NOT generate any code. Only text describing the scene/animation.
+        6. **Technical Constraints**: 
+           - Explicitly state that the code generator must use standard, built-in constants and avoid guessing variable names for colors.
+           - **For Manim**: 
+             - Warn that \`Text\` mobjects do **NOT** accept \`text_align\` as a constructor argument.
+             - **CRITICAL**: Do **NOT** call \`obj.fix_in_frame()\`. In \`ThreeDScene\`, use \`self.add_fixed_in_frame_mobjects(obj)\` instead.
+             - **Camera Control**: Do **NOT** use \`Rotate()\` on camera attributes like \`phi\` or \`theta\`. Use \`self.move_camera(phi=..., theta=...)\` for camera orientation animations.
+             - **Rotations**: Strictly use \`about_point=...\` (NOT \`about_pt=\`) when specifying the rotation center for any mobject.
+
+        Structure your output as a single, cohesive paragraph or a list of specific instructions for the specialized code-generating AI.
+        `;
+      
+      const refinedResponse = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
-        config: {
-          systemInstruction: "You are an expert Manim developer. Generate valid Python code using the Manim library based on the user's request. Output ONLY the raw Python code, no markdown fencing, no explanations."
-        }
+        config: { systemInstruction: refineSystemPrompt }
       });
-      return { type: 'manim', status: 'ready', content: response.text }; 
+
+      const detailedPrompt = refinedResponse.text || payload.content;
+
+      // Step 2: Generate the Manim code
+      const manimSystemPrompt = `
+        You are an expert Python developer specializing in Manim (Community Edition).
+        Your task is to write a complete, runnable Python script using Manim to visualize the user's request.
+
+        Description of requested video: "${detailedPrompt}"
+
+        Rules:
+        1.  **Imports**: Always start with \`from manim import *\`. Import \`numpy as np\` if needed.
+        2.  **Class Name**: Define a class named \`VideoScene\` that inherits from \`Scene\`.
+        3.  **Construct Method**: Implement the \`construct(self)\` method.
+        4.  **Content**: 
+            - Create clear, educational visualizations.
+            - Use \`Text\`, \`MathTex\`, \`Circle\`, \`Square\`, \`Create\`, \`FadeIn\`, \`FadeOut\`, \`Transform\`, etc.
+            - Ensure animations are smooth and well-timed (use \`self.wait()\`).
+            - Keep the total runtime reasonable (10-30 seconds).
+        5.  **Output**: Return ONLY the Python code. Do not include markdown formatting like \`\`\`python ... \`\`\`.
+        6.  **Error Handling**: Ensure the code is syntactically correct and uses valid Manim Community v0.17+ syntax.
+        7.  **Assets**: Do NOT use any external files (images, SVGs, sounds). Use only built-in Manim shapes (Circle, Square, etc) and text.
+        8.  **Colors**: 
+            - Use standard Manim color constants (e.g., \`BLUE\`, \`RED\`, \`WHITE\`, \`YELLOW\`, \`GREEN\`, \`ORANGE\`, \`PURPLE\`, \`PINK\`, \`TEAL\`, \`GOLD\`, \`MAROON\`, \`SCARLET\`).
+            - **NEVER** use names like \`LIGHT_BLUE\`, \`DARK_GREY\`, or any other guessed color names.
+            - If you need a specific shade, define it with a Hex code: \`S_COLOR = "#ADD8E6"\`.
+        9.  **Library Defaults**: Stick to standard \`Scene\` or \`ThreeDScene\` methods. Do not assume existence of unimported utilities.
+        10. **Text Alignment**: 
+            - **CRITICAL**: The \`Text\` class does **NOT** accept a \`text_align\` argument. 
+            - To align text, use \`Tex\` with \`alignment\` (e.g., \`Tex("...", alignment="\\\\\\RaggedRight")\`) or manually position mobjects using \`obj.next_to(other_obj, DOWN)\`.
+            - Ensure all keyword arguments passed to \`Text\`, \`Tex\`, or \`Circle\` are valid per Manim Community standards.
+        11. **3D Scenes**:
+            - If using \`ThreeDScene\`, do **NOT** call \`obj.fix_in_frame()\`. This method does not exist on mobjects.
+            - Instead, use \`self.add_fixed_in_frame_mobjects(obj)\` to keep UI elements or text fixed relative to the camera.
+        12. **Camera Rotation & Movement**:
+            - **CRITICAL**: Do **NOT** use \`self.camera.animate\`. This will cause an AttributeError.
+            - **CRITICAL**: Do **NOT** use \`Rotate(self.camera.phi, ...)\` or \`Rotate(self.camera.theta, ...)\`.
+            - To animate camera movement/rotation, use \`self.move_camera(phi=NEW_PHI, theta=NEW_THETA, focal_distance=..., run_time=...)\`.
+            - To start a continuous rotation, use \`self.begin_ambient_camera_rotation(rate=...)\`.
+        13. **Rotation Arguments**:
+            - **CRITICAL**: The keyword argument for specifying a rotation center is \`about_point\`. 
+            - **NEVER** use \`about_pt\`, as this will cause a \`TypeError\`.
+        14. **Performance & Complexity**:
+            - **CRITICAL**: Keep the scene simple to ensure it renders within 5 minutes.
+            - **Animations**: Stick to standard animations: \`Create\`, \`Uncreate\`, \`FadeIn\`, \`FadeOut\`, \`Write\`, \`Transform\`, \`ReplacementTransform\`. 
+            - **NEVER** use hallucinated composite animations like \`ShrinkAndFadeOut\`.
+            - **Limit Objects**: Do not create or animate more than 15-20 mobjects in a single scene.
+            - **Sphere Resolution**: If using \`Sphere\`, **ALWAYS** use low resolution: \`Sphere(radius=..., resolution=(12, 12))\`. Default resolution is too high and will cause timeouts.
+            - **Limit Transforms**: Avoid complex \`Transform\` or \`ReplacementTransform\` on high-resolution geometry.
+        15. **Positioning Constants**:
+            - **CRITICAL**: Use only standard Manim direction constants: \`UP\`, \`DOWN\`, \`LEFT\`, \`RIGHT\`, \`ORIGIN\`, \`IN\`, \`OUT\`, \`UL\`, \`UR\`, \`DL\`, \`DR\`.
+            - **NEVER** use \`TOP\` or \`BOTTOM\`. Use \`UP\` or \`DOWN\` instead (e.g., \`obj.to_edge(UP)\`).
+            - **NEVER** use \`CENTER\`. Use \`ORIGIN\` if you mean the center of the scene.
+
+        Example Structure:
+        from manim import *
+
+        class VideoScene(Scene):
+            def construct(self):
+                t = Text("Hello World")
+                self.play(Write(t))
+                self.wait()
+        `;
+
+      const codeResponse = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [{ role: "user", parts: [{ text: manimSystemPrompt }] }]
+      });
+
+      let rawCode = codeResponse.text || "";
+      rawCode = rawCode.replace(/```python/g, '').replace(/```/g, '').trim();
+
+      // IMPORTANT: In useStreamingChat, we look for `video_create_success` inside `jsonData.type`
+      return { type: 'video_create_success', status: 'ready', data: rawCode }; 
     } catch (error) {
       console.error("Video Error:", error);
-      return { type: 'manim', status: 'error', content: "Failed to generate video" };
+      return { type: 'video_create', status: 'error', data: "Failed to generate video" };
     }
   }
 

@@ -156,8 +156,42 @@ function InnerEditor({ pageId, initialTitle, initialContent, editable, doc, prov
             }
         };
 
+        const handleInsertVideoBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { blockId, isLoading } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+            
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ id: blockId, type: "video_block", props: { isLoading: isLoading ? "true" : "false", url: "" } }]);
+            } else {
+                editor.insertBlocks([{ id: blockId, type: "video_block", props: { isLoading: isLoading ? "true" : "false", url: "" } }], currentBlock, "after");
+            }
+        };
+
+        const handleUpdateVideoBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { blockId, url, isLoading, error } = customEvent.detail;
+            
+            try {
+                editor.updateBlock(blockId, {
+                    type: "video_block",
+                    props: { url: url || "", isLoading: isLoading ? "true" : "false" }
+                });
+                setSaveStatus("saved");
+            } catch (err) {
+                console.error("Could not update video block:", err);
+            }
+        };
+
         window.addEventListener('ai-blocks-updated', handleAiUpdate);
-        return () => window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+        window.addEventListener('insert-video-block', handleInsertVideoBlock);
+        window.addEventListener('update-video-block', handleUpdateVideoBlock);
+
+        return () => {
+             window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+             window.removeEventListener('insert-video-block', handleInsertVideoBlock);
+             window.removeEventListener('update-video-block', handleUpdateVideoBlock);
+        };
     }, [editor, setSaveStatus]);
 
     if (!editor) return null;

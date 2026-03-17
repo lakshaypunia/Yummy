@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
             success: true,
             message: result.message,
             actions: result.actions,
+            data: result.data,
         });
 
     } catch (error) {
