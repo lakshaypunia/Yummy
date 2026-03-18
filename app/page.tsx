@@ -27,7 +27,7 @@ export default async function Home() {
             </svg>
           </div>
           <span className="text-[13px] font-semibold text-[var(--color-text-primary)] tracking-[-0.2px]">
-            Pathly
+            Yummy
           </span>
         </div>
 

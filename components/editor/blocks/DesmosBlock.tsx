@@ -11,6 +11,9 @@ export const DesmosBlock = createReactBlockSpec(
             state: {
                 default: "null",
             },
+            equations: {
+                default: "null",
+            },
         },
         content: "none",
     },
@@ -57,6 +60,13 @@ export const DesmosBlock = createReactBlockSpec(
                             calculator.setState(state);
                         } catch (e) {
                             console.error("Failed to load Desmos state", e);
+                        }
+                    } else if (props.block.props.equations && props.block.props.equations !== "null") {
+                        try {
+                            const equations = JSON.parse(props.block.props.equations);
+                            calculator.setExpressions(equations);
+                        } catch (e) {
+                            console.error("Failed to load Desmos equations", e);
                         }
                     }
 

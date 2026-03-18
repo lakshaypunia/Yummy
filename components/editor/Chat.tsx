@@ -69,7 +69,7 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                     })
                 );
             } else {
-                 throw new Error("Local video generation failed to return a path.");
+                throw new Error("Local video generation failed to return a path.");
             }
         } catch (error) {
             console.error("Error generating video:", error);
@@ -86,14 +86,14 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
         try {
             // Dynamically import the parser to avoid SSR issues
             const { parseMermaidToExcalidraw } = await import("@excalidraw/mermaid-to-excalidraw");
-            
+
             // Parse the mermaid output into Excalidraw elements
             const { elements, files } = await parseMermaidToExcalidraw(mermaidCode);
 
             // Dispatch event to Editor with JSON strings of elements
             window.dispatchEvent(
                 new CustomEvent("insert-diagram-block", {
-                    detail: { 
+                    detail: {
                         elements: JSON.stringify(elements),
                         files: files ? JSON.stringify(files) : null
                     }
@@ -116,9 +116,19 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     const handleReactFlowIntent = async (flowData: any) => {
         window.dispatchEvent(
             new CustomEvent("insert-react-flow-block", {
-                detail: { 
+                detail: {
                     nodes: JSON.stringify(flowData.nodes || []),
                     edges: JSON.stringify(flowData.edges || [])
+                }
+            })
+        );
+    };
+
+    const handleDesmosIntent = async (equations: any) => {
+        window.dispatchEvent(
+            new CustomEvent("insert-desmos-block", {
+                detail: {
+                    equations: JSON.stringify(equations || [])
                 }
             })
         );
@@ -134,7 +144,8 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
         onVideoIntent: handleVideoIntent,
         onDiagramIntent: handleDiagramIntent,
         onP5Intent: handleP5Intent,
-        onReactFlowIntent: handleReactFlowIntent
+        onReactFlowIntent: handleReactFlowIntent,
+        onDesmosIntent: handleDesmosIntent
     });
 
     // Auto-scroll logic remains to keep the latest messages in view

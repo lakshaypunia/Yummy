@@ -22,6 +22,7 @@ interface UseStreamingChatOptions {
     onP5Intent?: (data: any) => Promise<void>;
     onReactFlowIntent?: (data: any) => Promise<void>;
     onRagIntent?: (data: string) => Promise<void>;
+    onDesmosIntent?: (data: any) => Promise<void>;
     onPageUpdate?: (data: any) => Promise<void>;
 }
 
@@ -52,6 +53,7 @@ export function useStreamingChat({
     onP5Intent,
     onReactFlowIntent,
     onRagIntent,
+    onDesmosIntent,
     onPageUpdate
 }: UseStreamingChatOptions) {
     const queryClient = useQueryClient();
@@ -220,6 +222,23 @@ export function useStreamingChat({
                         return;
                     }
 
+                    if (resultData?.type === 'desmos_create_success' && onDesmosIntent) {
+                        setIsStreaming(false);
+                        queryClient.setQueryData<Message[]>(
+                            ['chat-messages', chatId],
+                            (old = []) =>
+                                old.map((msg) =>
+                                    msg.id === aiMessageId
+                                        ? { ...msg, content: jsonData.message, isComplete: true }
+                                        : msg
+                                )
+                        );
+                        await onDesmosIntent(resultData.data);
+                        await refetch();
+                        onStreamEnd?.();
+                        return;
+                    }
+
                     if (resultData?.type === 'rag_create_success') {
                         setIsStreaming(false);
                         queryClient.setQueryData<Message[]>(
@@ -327,7 +346,7 @@ export function useStreamingChat({
                 abortControllerRef.current = null;
             }
         },
-        [chatId, pageId, isStreaming, onError, onStreamStart, onStreamEnd, onVideoIntent, onAnimationIntent, onDiagramIntent, onP5Intent, onReactFlowIntent, onRagIntent, onPageUpdate, queryClient, refetch, getToken]
+        [chatId, pageId, isStreaming, onError, onStreamStart, onStreamEnd, onVideoIntent, onAnimationIntent, onDiagramIntent, onP5Intent, onReactFlowIntent, onRagIntent, onDesmosIntent, onPageUpdate, queryClient, refetch, getToken]
     );
 
     const cancelStream = useCallback(() => {
