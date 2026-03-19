@@ -10,7 +10,8 @@ import {
 import Link from "next/link";
 import { useWhiteboardStore } from "@/hooks/useWhiteboardStore";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useBroadcastStore } from "@/hooks/useBroadcastStore";
 import { useUser } from "@clerk/nextjs";
 import { SpaceDocumentsModal } from "@/components/SpaceDocumentsModal";
@@ -102,8 +103,8 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
     // ── Collapsed State ──────────────────────────────────────────────────
     if (isMinimized) {
         return (
-            <div className="w-13 h-full shrink-0 overflow-hidden bg-[var(--color-secondary)] border-r border-[var(--color-border-primary)]/30 flex flex-col">
-                
+            <div className="w-13 h-full shrink-0 bg-[var(--color-secondary)] border-r border-[var(--color-border-primary)]/30 flex flex-col">
+
                 {/* Header with expand button */}
                 <div className="shrink-0 h-11 w-full flex items-center justify-center border-b border-[var(--color-border-primary)]/30">
                     <TooltipButton content="Expand sidebar">
@@ -394,20 +395,54 @@ function SidebarButton({
     );
 }
 
-// ── CSS-Only Tooltip Component ────────────────────────────────────────
+// ── Portal Tooltip Component ──────────────────────────────────────────
+// Renders the tooltip into document.body via a React portal, which means
+// it is never clipped by any ancestor's overflow:hidden — no matter how
+// deeply nested the trigger is.
 
 function TooltipButton({ children, content }: { children: React.ReactNode; content: string }) {
-    // Replaced slow React state with pure CSS group-hover for instant, lag-free tooltips.
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
+
+    const showTooltip = useCallback(() => {
+        if (!triggerRef.current) return;
+        const rect = triggerRef.current.getBoundingClientRect();
+        setTooltipPos({
+            top: rect.top + rect.height / 2,  // vertically centred on the button
+            left: rect.right + 10,             // 10px gap to the right of the button
+        });
+    }, []);
+
+    const hideTooltip = useCallback(() => {
+        setTooltipPos(null);
+    }, []);
+
     return (
-        <div className="group relative flex justify-center w-full">
+        <div
+            ref={triggerRef}
+            className="relative flex justify-center w-full"
+            onMouseEnter={showTooltip}
+            onMouseLeave={hideTooltip}
+        >
             {children}
-            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 z-50 pointer-events-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 ease-in-out">
-                <div className="bg-[var(--color-background)] border border-[var(--color-border-primary)]/40 text-[var(--color-text-primary)] px-2.5 py-1.5 rounded-md text-xs font-medium shadow-md whitespace-nowrap">
-                    {content}
-                    {/* Tooltip Triangle */}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-r-[5px] border-r-[var(--color-border-primary)]/40" />
-                </div>
-            </div>
+
+            {tooltipPos && createPortal(
+                <div
+                    className="fixed z-[9999] pointer-events-none"
+                    style={{
+                        top: tooltipPos.top,
+                        left: tooltipPos.left,
+                        transform: "translateY(-50%)",
+                    }}
+                >
+                    <div className="bg-[var(--color-background)] border border-[var(--color-border-primary)]/40 text-[var(--color-text-primary)] px-2.5 py-1.5 rounded-md text-xs font-medium shadow-md whitespace-nowrap animate-in fade-in duration-100">
+                        {content}
+                        {/* Left-pointing caret */}
+                        <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-y-[4px] border-y-transparent border-r-[5px] border-r-[var(--color-border-primary)]/40" />
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }

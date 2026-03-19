@@ -259,7 +259,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
     if (!editor) return null;
 
     return (
-        <div className="flex-1 overflow-y-auto w-full py-2 px-2 sm:px-4">
+        <div className="flex-1 pt-12 md:pt-20 overflow-y-auto w-full py-2 px-2 sm:px-4">
             <BlockNoteView
                 editor={editor}
                 theme="light"

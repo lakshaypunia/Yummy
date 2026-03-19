@@ -30,6 +30,7 @@ export function PageEditorLayout({
     const [isSideChatMinimized, setIsSideChatMinimized] = useState(false);
     const [chatWidthPercent, setChatWidthPercent] = useState(30);
     const [isDragging, setIsDragging] = useState(false);
+    const [isResizerHovered, setIsResizerHovered] = useState(false);
     const isDraggingRef = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -51,44 +52,48 @@ export function PageEditorLayout({
             if (isDraggingRef.current) {
                 isDraggingRef.current = false;
                 setIsDragging(false);
-                document.body.style.cursor = 'default';
-                document.body.style.userSelect = 'auto';
+                document.body.style.cursor = "default";
+                document.body.style.userSelect = "auto";
             }
         };
 
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
 
         return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
         };
     }, []);
-
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
         isDraggingRef.current = true;
         setIsDragging(true);
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
     };
 
     return (
-        <div ref={containerRef} className="flex h-full w-full relative overflow-hidden bg-[var(--color-background)]">
-
-
-
-            {/* Main Content Area */}
+        <div
+            ref={containerRef}
+            className="flex h-full w-full relative overflow-hidden bg-[var(--color-background)]"
+        >
+            {/* ── Main Editor Pane ─────────────────────────────────────── */}
             <div
-                className={`relative flex flex-col h-full ${isDragging ? '' : 'transition-all duration-300'}`}
-                style={{ width: !isSideChatMinimized ? `${100 - chatWidthPercent}%` : '100%' }}
+                className={`relative flex flex-col h-full min-w-0 ${
+                    isDragging ? "" : "transition-[width] duration-200 ease-out"
+                }`}
+                style={{
+                    width: !isSideChatMinimized ? `${100 - chatWidthPercent}%` : "100%",
+                }}
             >
-
-                {/* Editor Container */}
                 <div className="flex-1 w-full relative overflow-hidden">
                     {isAuthor && (
-                        <PageVisibilityToggle pageId={pageId} initialVisibility={initialVisibility} />
+                        <PageVisibilityToggle
+                            pageId={pageId}
+                            initialVisibility={initialVisibility}
+                        />
                     )}
                     <EditorWrapper
                         pageId={pageId}
@@ -100,37 +105,88 @@ export function PageEditorLayout({
                 </div>
             </div>
 
-            {/* Resizer Handle */}
+            {/* ── Resizer ──────────────────────────────────────────────── */}
             {!isSideChatMinimized && (
                 <div
-                    className="absolute top-0 bottom-0 w-2 cursor-col-resize hover:bg-[var(--color-primary)]/20 active:bg-[var(--color-primary)]/30 transition-colors z-10 flex flex-col justify-center items-center group transform -translate-x-1/2"
-                    style={{ left: `${100 - chatWidthPercent}%` }}
+                    className="absolute top-0 bottom-0 z-10 flex items-center justify-center"
+                    style={{
+                        left: `${100 - chatWidthPercent}%`,
+                        width: "16px",
+                        transform: "translateX(-50%)",
+                        cursor: "col-resize",
+                    }}
                     onMouseDown={handleMouseDown}
+                    onMouseEnter={() => setIsResizerHovered(true)}
+                    onMouseLeave={() => setIsResizerHovered(false)}
                 >
-                    <div className="h-10 w-1 rounded-full bg-[var(--color-border-primary)] group-hover:bg-[var(--color-primary)] transition-colors"></div>
+                    {/* Hairline track */}
+                    <div
+                        className="h-full w-px transition-all duration-150"
+                        style={{
+                            background: isResizerHovered || isDragging
+                                ? "var(--color-text-muted)"
+                                : "var(--color-border-primary)",
+                            opacity: isResizerHovered || isDragging ? 0.6 : 0.3,
+                        }}
+                    />
+                    {/* Drag pill — visible on hover/drag */}
+                    <div
+                        className="absolute flex flex-col gap-[3px] items-center transition-opacity duration-150"
+                        style={{ opacity: isResizerHovered || isDragging ? 1 : 0 }}
+                    >
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="w-[3px] h-[3px] rounded-full bg-[var(--color-text-muted)]"
+                                style={{ opacity: 0.5 + i * 0.1 }}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {/* Side Chat Panel */}
+            {/* ── Side Chat Pane ───────────────────────────────────────── */}
             <div
-                className={`h-full border-l border-[var(--color-border-primary)] bg-[var(--color-card)] ${isDragging ? '' : 'transition-all duration-300'} ${isSideChatMinimized ? 'w-12 items-center flex flex-col pt-4 shrink-0' : 'p-4 flex flex-col shrink-0'}`}
-                style={{ width: !isSideChatMinimized ? `${chatWidthPercent}%` : undefined }}
+                className={`
+                    h-full shrink-0 flex flex-col
+                    border-l border-[var(--color-border-primary)]/40
+                    bg-[var(--color-card)]
+                    ${isDragging ? "" : "transition-[width] duration-200 ease-out"}
+                    ${isSideChatMinimized ? "w-12 items-center justify-start pt-4" : ""}
+                `}
+                style={{
+                    width: !isSideChatMinimized ? `${chatWidthPercent}%` : undefined,
+                }}
             >
                 {isSideChatMinimized ? (
+                    /* ── Collapsed pill ── */
                     <button
                         onClick={() => setIsSideChatMinimized(false)}
-                        className="bg-[var(--color-primary)] text-white p-2 rounded-full hover:shadow-lg transition-all"
                         title="Open Chat"
+                        className="
+                            group relative w-8 h-8 mx-auto
+                            rounded-full flex items-center justify-center
+                            bg-[var(--color-background)]
+                            border border-[var(--color-border-primary)]/50
+                            text-[var(--color-text-muted)]
+                            hover:border-[var(--color-text-muted)]/60
+                            hover:text-[var(--color-text-primary)]
+                            hover:shadow-sm
+                            transition-all duration-200
+                        "
                     >
-                        <MessageSquare size={20} />
+                        <MessageSquare size={15} strokeWidth={1.5} />
                     </button>
                 ) : (
-                    <Chat
-                        chatId={chatId}
-                        pageId={pageId}
-                        viewMode="side"
-                        onMinimizeSideChat={() => setIsSideChatMinimized(true)}
-                    />
+                    /* ── Expanded chat ── */
+                    <div className="flex flex-col h-full w-full overflow-hidden px-3 py-3 gap-3">
+                        <Chat
+                            chatId={chatId}
+                            pageId={pageId}
+                            viewMode="side"
+                            onMinimizeSideChat={() => setIsSideChatMinimized(true)}
+                        />
+                    </div>
                 )}
             </div>
         </div>

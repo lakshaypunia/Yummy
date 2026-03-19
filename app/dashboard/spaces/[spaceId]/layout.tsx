@@ -29,10 +29,8 @@ export default async function SpaceLayout({
 
     return (
         <RealtimeSpaceProvider spaceId={spaceId}>
-            <SpaceWhiteboardOverlay spaceId={spaceId} />
             <LiveKitBroadcastOverlay spaceId={spaceId} />
             <InviteToBroadcastModal spaceId={spaceId} />
-
             <div className="flex h-screen w-full overflow-hidden bg-[var(--color-blockNote-background)]">
                 <PageSidebar
                     spaceId={spaceId}
