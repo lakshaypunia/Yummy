@@ -4,21 +4,21 @@ import { prisma } from "@/lib/prisma";
 
 
 export interface AIAction {
-    type: 'chat' | 'page_update' | 'video_create' | 'animation_create' | 'doc_search' | 'diagram_create';
-    payload: {
-        topic?: string;
-        content?: string;
-        query?: string;
-        instructions?: string;
-    };
-    reasoning?: string;
+  type: 'chat' | 'page_update' | 'video_create' | 'animation_create' | 'doc_search' | 'diagram_create';
+  payload: {
+    topic?: string;
+    content?: string;
+    query?: string;
+    instructions?: string;
+  };
+  reasoning?: string;
 }
 
 // The overall structure the Supervisor Brain returns
 export interface AIResponse {
-    intent: 'chat' | 'page_update' | 'video_create' | 'animation_create'; 
-    message: string; // The text summary for the chat window
-    actions: AIAction[]; // Parallel tasks to execute
+  intent: 'chat' | 'page_update' | 'video_create' | 'animation_create';
+  message: string; // The text summary for the chat window
+  actions: AIAction[]; // Parallel tasks to execute
 }
 
 export class AgentOrchestrator {
@@ -28,13 +28,13 @@ export class AgentOrchestrator {
    */
   private static async identifyMultiIntent(content: string): Promise<AIResponse> {
     try {
-        // Use the generativeModel property or the direct generateContent approach 
-        // depending on your specific version. Usually it is:
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: [{ role: "user", parts: [{ text: content }] }],
-            config: {
-                systemInstruction: `
+      // Use the generativeModel property or the direct generateContent approach 
+      // depending on your specific version. Usually it is:
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: content }] }],
+        config: {
+          systemInstruction: `
                     You are the "Multi-Task Intent Identifier".
                     Analyze the query and plan a set of parallel actions.
                     Return ONLY JSON matching the AIResponse interface.
@@ -45,15 +45,15 @@ export class AgentOrchestrator {
                     - CONTENT: Add 'page_update' for learning/summarizing.
                     - ALWAYS: Include a 'chat' action in PAST TENSE.
                 `,
-                responseMimeType: "application/json",
-            }
-        });
+          responseMimeType: "application/json",
+        }
+      });
 
-        const text = response.text || "";
-        return JSON.parse(text) as AIResponse;
+      const text = response.text || "";
+      return JSON.parse(text) as AIResponse;
     } catch (error) {
-        console.error("Brain Identification Error:", error);
-        throw error;
+      console.error("Brain Identification Error:", error);
+      throw error;
     }
   }
 
@@ -62,11 +62,11 @@ export class AgentOrchestrator {
    */
   static async run(content: string, userId: string, aiMessageId: string, pageId?: string) {
     console.log("🧠 Brain identifying tasks based on tags...");
-    
+
     // 1. IDENTIFY
     // Commenting out the multi-intent identifier for now
     // const plan = await this.identifyMultiIntent(content);
-    
+
     let actionType = 'chat';
     let cleanContent = content;
 
@@ -91,6 +91,9 @@ export class AgentOrchestrator {
     } else if (content.includes('@rag')) {
       actionType = 'rag_create';
       cleanContent = content.replace('@rag', '').trim();
+    } else if (content.includes('@desmos')) {
+      actionType = 'desmos_create';
+      cleanContent = content.replace('@desmos', '').trim();
     }
 
     const payload = {
@@ -106,16 +109,16 @@ export class AgentOrchestrator {
     // 2. EXECUTE BASED ON TAG
     try {
       switch (actionType) {
-        case 'animation_create': 
+        case 'animation_create':
           result = await this.handleAnimation(payload, userId);
           break;
-        case 'video_create': 
+        case 'video_create':
           result = await this.handleVideo(payload);
           break;
-        case 'page_update': 
+        case 'page_update':
           result = await this.handlePageUpdate(payload, userId);
           break;
-        case 'diagram_create': 
+        case 'diagram_create':
           result = await this.handleDiagram(payload);
           break;
         case 'p5_create':
@@ -127,8 +130,11 @@ export class AgentOrchestrator {
         case 'rag_create':
           result = await this.handleRag(payload);
           break;
-        case 'chat': 
-        default: 
+        case 'desmos_create':
+          result = await this.handleDesmos(payload);
+          break;
+        case 'chat':
+        default:
           result = await this.handleChat(payload);
           break;
       }
@@ -166,10 +172,10 @@ export class AgentOrchestrator {
     return { type: 'animation_create', status: 'error', message: 'Not implemented' };
   }
 
-  private static async handleP5(payload: any) { 
+  private static async handleP5(payload: any) {
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
           systemInstruction: `You are an expert p5.js developer. Generate an interactive p5.js sketch based on the user's request. 
@@ -179,14 +185,14 @@ export class AgentOrchestrator {
       });
       let rawHtml = response.text || "";
       rawHtml = rawHtml.replace(/```html/g, '').replace(/```/g, '').trim();
-      return { type: 'p5_create_success', status: 'ready', data: rawHtml }; 
+      return { type: 'p5_create_success', status: 'ready', data: rawHtml };
     } catch (error) {
       console.error("p5 Error:", error);
       return { type: 'p5_create', status: 'error', data: "Failed to generate p5.js sketch" };
     }
   }
 
-  private static async handleReactFlow(payload: any) { 
+  private static async handleReactFlow(payload: any) {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -207,14 +213,41 @@ export class AgentOrchestrator {
       } catch (e) {
         throw new Error("Failed to parse React Flow JSON");
       }
-      return { type: 'react_flow_create_success', status: 'ready', data: flowJson }; 
+      return { type: 'react_flow_create_success', status: 'ready', data: flowJson };
     } catch (error) {
       console.error("React Flow Error:", error);
       return { type: 'react_flow_create', status: 'error', data: "Failed to generate React Flow" };
     }
   }
 
-  private static async handleVideo(payload: any) { 
+  private static async handleDesmos(payload: any) {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: payload.content }] }],
+        config: {
+          systemInstruction: `You are an expert math teacher and Desmos power user. Generate a list of Desmos calculator expressions based on the user's request.
+          You must return ONLY a JSON array of objects.
+          Each object must represent a Desmos expression with this format:
+          { "id": "graph1", "latex": "y = x^2", "color": "#c74440", "hidden": false }
+          Do NOT include markdown fencing. Return ONLY a parseable JSON array.`,
+          responseMimeType: "application/json"
+        }
+      });
+      let expressions;
+      try {
+        expressions = JSON.parse(response.text || '[]');
+      } catch (e) {
+        throw new Error("Failed to parse Desmos expressions JSON");
+      }
+      return { type: 'desmos_create_success', status: 'ready', data: expressions };
+    } catch (error) {
+      console.error("Desmos Error:", error);
+      return { type: 'desmos_create', status: 'error', data: "Failed to generate Desmos equations" };
+    }
+  }
+
+  private static async handleVideo(payload: any) {
     try {
       // Step 1: Refine the prompt to expand on creativity and strict constraints
       const refineSystemPrompt = `
@@ -242,7 +275,7 @@ export class AgentOrchestrator {
 
         Structure your output as a single, cohesive paragraph or a list of specific instructions for the specialized code-generating AI.
         `;
-      
+
       const refinedResponse = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
@@ -321,14 +354,14 @@ export class AgentOrchestrator {
       rawCode = rawCode.replace(/```python/g, '').replace(/```/g, '').trim();
 
       // IMPORTANT: In useStreamingChat, we look for `video_create_success` inside `jsonData.type`
-      return { type: 'video_create_success', status: 'ready', data: rawCode }; 
+      return { type: 'video_create_success', status: 'ready', data: rawCode };
     } catch (error) {
       console.error("Video Error:", error);
       return { type: 'video_create', status: 'error', data: "Failed to generate video" };
     }
   }
 
-  private static async handlePageUpdate(payload: any, userId: string) { 
+  private static async handlePageUpdate(payload: any, userId: string) {
     if (!payload.pageId) {
       return { type: 'blocknote', status: 'error', message: "No active page found. Please open a page to update." };
     }
@@ -337,7 +370,7 @@ export class AgentOrchestrator {
       // 1. Fetch current blocks
       const page = await prisma.page.findUnique({ where: { id: payload.pageId } });
       if (!page || !page.blockJson) {
-         throw new Error("Page not found or empty.");
+        throw new Error("Page not found or empty.");
       }
 
       const currentBlocks = page.blockJson as any[];
@@ -382,7 +415,7 @@ export class AgentOrchestrator {
       }
 
       if (updates.length === 0) {
-         return { type: 'blocknote', status: 'ready', message: "AI decided no changes were necessary based on your request." };
+        return { type: 'blocknote', status: 'ready', message: "AI decided no changes were necessary based on your request." };
       }
 
       // 4. Create the new blocks array by replacing targeted blocks with ai_update_suggestion blocks
@@ -417,7 +450,7 @@ export class AgentOrchestrator {
       const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
       // Ensure we hit the HTTP broadcast endpoint, not the WS connection
       const broadcastHttpUrl = syncServerUrl.replace("ws://", "http://").replace("wss://", "https://") + "/api/broadcast";
-      
+
       try {
         await fetch(broadcastHttpUrl, {
           method: 'POST',
@@ -436,17 +469,17 @@ export class AgentOrchestrator {
         // It's okay if it fails, they can refresh to see it from the DB
       }
 
-      return { type: 'blocknote', status: 'ready', message: "I've suggested updates on the page. Please review them." }; 
+      return { type: 'blocknote', status: 'ready', message: "I've suggested updates on the page. Please review them." };
     } catch (error) {
       console.error("Page Update Error:", error);
       return { type: 'blocknote', status: 'error', message: "Failed to generate page update" };
     }
   }
 
-  private static async handleDiagram(payload: any) { 
+  private static async handleDiagram(payload: any) {
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
           systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code specifically a 'flowchart TD' or 'graph flowTD' based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
@@ -454,7 +487,7 @@ export class AgentOrchestrator {
       });
       let rawMermaid = response.text || "";
       rawMermaid = rawMermaid.replace(/```mermaid/g, '').replace(/```/g, '').trim();
-      return { type: 'diagram_create_success', status: 'ready', data: rawMermaid }; 
+      return { type: 'diagram_create_success', status: 'ready', data: rawMermaid };
     } catch (error) {
       console.error("Diagram Error:", error);
       return { type: 'diagram_create', status: 'error', data: "Failed to generate diagram" };
@@ -470,27 +503,27 @@ export class AgentOrchestrator {
       const page = await prisma.page.findUnique({ where: { id: payload.pageId } });
       // @ts-ignore
       if (!page || !page.geminiFileUri) {
-         // Return a helpful message so the user knows they need to attach a PDF first.
-         return { type: 'chat', status: 'ready', message: "I couldn't find an attached PDF Document for this page! Please attach a document first using the knowledge base." };
+        // Return a helpful message so the user knows they need to attach a PDF first.
+        return { type: 'chat', status: 'ready', message: "I couldn't find an attached PDF Document for this page! Please attach a document first using the knowledge base." };
       }
 
       let contentParts: any[] = [
-          // @ts-ignore
-          { fileData: { fileUri: page.geminiFileUri, mimeType: "application/pdf" } },
-          { text: payload.content }
+        // @ts-ignore
+        { fileData: { fileUri: page.geminiFileUri, mimeType: "application/pdf" } },
+        { text: payload.content }
       ];
 
       let reqConfig: any = {
-          systemInstruction: "You are an expert assistant. Answer the user's query based ONLY on the attached cached document. If the answer is not in the document, reply that you don't know.",
+        systemInstruction: "You are an expert assistant. Answer the user's query based ONLY on the attached cached document. If the answer is not in the document, reply that you don't know.",
       };
 
       // @ts-ignore
       if (page.geminiCacheName) {
-          // @ts-ignore
-          reqConfig.cachedContent = page.geminiCacheName;
-          
-          // If using the explicit Cache API, the file data shouldn't be re-passed in the contents array.
-          contentParts = [{ text: payload.content }];
+        // @ts-ignore
+        reqConfig.cachedContent = page.geminiCacheName;
+
+        // If using the explicit Cache API, the file data shouldn't be re-passed in the contents array.
+        contentParts = [{ text: payload.content }];
       }
 
       const response = await ai.models.generateContent({
@@ -501,14 +534,14 @@ export class AgentOrchestrator {
 
       const answer = response.text || "";
       const usageMetadata = response.usageMetadata;
-      
+
       const metricsLog = `--- RAG Query ---\nTimestamp: ${new Date().toISOString()}\nQuery: ${payload.content}\nCached Tokens: ${usageMetadata?.cachedContentTokenCount || 0}\nPrompt Tokens: ${usageMetadata?.promptTokenCount || 0}\nCandidates Tokens: ${usageMetadata?.candidatesTokenCount || 0}\nTotal Tokens: ${usageMetadata?.totalTokenCount || 0}\n\n`;
-      
+
       const fs = require('fs');
       const path = require('path');
       const logPath = path.join(process.cwd(), 'matrix.txt');
       fs.appendFileSync(logPath, metricsLog);
-      
+
       console.log("[RAG] Wrote matrix checker tokens to matrix.txt");
 
       return { type: 'rag_create_success', status: 'ready', data: answer, message: answer };

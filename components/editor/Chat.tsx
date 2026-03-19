@@ -69,13 +69,19 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     const handleDiagramIntent = async (mermaidCode: string) => {
         try {
             const { parseMermaidToExcalidraw } = await import("@excalidraw/mermaid-to-excalidraw");
+
+            // Parse the mermaid output into Excalidraw elements
             const { elements, files } = await parseMermaidToExcalidraw(mermaidCode);
-            window.dispatchEvent(new CustomEvent("insert-diagram-block", {
-                detail: {
-                    elements: JSON.stringify(elements),
-                    files: files ? JSON.stringify(files) : null
-                }
-            }));
+
+            // Dispatch event to Editor with JSON strings of elements
+            window.dispatchEvent(
+                new CustomEvent("insert-diagram-block", {
+                    detail: {
+                        elements: JSON.stringify(elements),
+                        files: files ? JSON.stringify(files) : null
+                    }
+                })
+            );
         } catch (error) {
             console.error("Failed to parse Mermaid to Excalidraw:", error);
         }
@@ -86,12 +92,24 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     };
 
     const handleReactFlowIntent = async (flowData: any) => {
-        window.dispatchEvent(new CustomEvent("insert-react-flow-block", {
-            detail: {
-                nodes: JSON.stringify(flowData.nodes || []),
-                edges: JSON.stringify(flowData.edges || [])
-            }
-        }));
+        window.dispatchEvent(
+            new CustomEvent("insert-react-flow-block", {
+                detail: {
+                    nodes: JSON.stringify(flowData.nodes || []),
+                    edges: JSON.stringify(flowData.edges || [])
+                }
+            })
+        );
+    };
+
+    const handleDesmosIntent = async (equations: any) => {
+        window.dispatchEvent(
+            new CustomEvent("insert-desmos-block", {
+                detail: {
+                    equations: JSON.stringify(equations || [])
+                }
+            })
+        );
     };
 
     const {
@@ -104,7 +122,8 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
         onVideoIntent: handleVideoIntent,
         onDiagramIntent: handleDiagramIntent,
         onP5Intent: handleP5Intent,
-        onReactFlowIntent: handleReactFlowIntent
+        onReactFlowIntent: handleReactFlowIntent,
+        onDesmosIntent: handleDesmosIntent
     });
 
     useEffect(() => {

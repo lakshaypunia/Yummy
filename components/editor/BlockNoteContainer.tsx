@@ -190,7 +190,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
             const customEvent = e as CustomEvent;
             const { elements, files } = customEvent.detail;
             const currentBlock = editor.getTextCursorPosition().block;
-            
+
             if (currentBlock.type === "paragraph" && !currentBlock.content) {
                 editor.replaceBlocks([currentBlock], [{ type: "excalidraw", props: { elements, files } }]);
             } else {
@@ -202,7 +202,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
             const customEvent = e as CustomEvent;
             const { code } = customEvent.detail;
             const currentBlock = editor.getTextCursorPosition().block;
-            
+
             if (currentBlock.type === "paragraph" && !currentBlock.content) {
                 editor.replaceBlocks([currentBlock], [{ type: "p5_block", props: { code } }]);
             } else {
@@ -214,11 +214,23 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
             const customEvent = e as CustomEvent;
             const { nodes, edges } = customEvent.detail;
             const currentBlock = editor.getTextCursorPosition().block;
-            
+
             if (currentBlock.type === "paragraph" && !currentBlock.content) {
                 editor.replaceBlocks([currentBlock], [{ type: "react_flow", props: { nodes, edges } }]);
             } else {
                 editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], currentBlock, "after");
+            }
+        };
+
+        const handleInsertDesmosBlock = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            const { equations } = customEvent.detail;
+            const currentBlock = editor.getTextCursorPosition().block;
+
+            if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                editor.replaceBlocks([currentBlock], [{ type: "desmos", props: { equations } }]);
+            } else {
+                editor.insertBlocks([{ type: "desmos", props: { equations } }], currentBlock, "after");
             }
         };
 
@@ -228,17 +240,19 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         window.addEventListener('insert-diagram-block', handleInsertDiagramBlock);
         window.addEventListener('insert-p5-block', handleInsertP5Block);
         window.addEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
+        window.addEventListener('insert-desmos-block', handleInsertDesmosBlock);
 
         return () => {
             window.removeEventListener('ai-blocks-updated', handleAiUpdate);
             window.removeEventListener('insert-video-block', handleInsertVideoBlock);
             window.removeEventListener('update-video-block', handleUpdateVideoBlock);
-             window.removeEventListener('ai-blocks-updated', handleAiUpdate);
-             window.removeEventListener('insert-video-block', handleInsertVideoBlock);
-             window.removeEventListener('update-video-block', handleUpdateVideoBlock);
-             window.removeEventListener('insert-diagram-block', handleInsertDiagramBlock);
-             window.removeEventListener('insert-p5-block', handleInsertP5Block);
-             window.removeEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
+            window.removeEventListener('ai-blocks-updated', handleAiUpdate);
+            window.removeEventListener('insert-video-block', handleInsertVideoBlock);
+            window.removeEventListener('update-video-block', handleUpdateVideoBlock);
+            window.removeEventListener('insert-diagram-block', handleInsertDiagramBlock);
+            window.removeEventListener('insert-p5-block', handleInsertP5Block);
+            window.removeEventListener('insert-react-flow-block', handleInsertReactFlowBlock);
+            window.removeEventListener('insert-desmos-block', handleInsertDesmosBlock);
         };
     }, [editor, setSaveStatus]);
 
@@ -383,7 +397,7 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
                                 } else {
                                     alert("Failed to create context cache: " + cacheRes.error);
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.error(e);
                                 alert("Error processing document cache.");
                             } finally {

@@ -70,7 +70,7 @@ export const ExcalidrawBlock = createReactBlockSpec(
             return (
                 <div className="w-full relative my-4 border rounded-lg overflow-hidden border-[var(--color-border-primary)] group" contentEditable={false}>
                     {/* Height determines how large the block appears in the document */}
-                    <div className="w-full h-[500px]">
+                    <div className="w-full aspect-video">
                         <ExcalidrawWrapper
                             initialData={initialData}
                             onChange={onChange}
