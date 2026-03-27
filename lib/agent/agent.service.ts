@@ -1,6 +1,7 @@
 // @/lib/ai/agent.service.ts
 import { ai } from "../ai/ai.service";
 import { prisma } from "@/lib/prisma";
+import { manimCode, mermaidCode } from "../video";
 
 
 export interface AIAction {
@@ -22,6 +23,32 @@ export interface AIResponse {
 }
 
 export class AgentOrchestrator {
+  private static async broadcastBlocks(pageId: string, blocks: any[], userId?: string) {
+    const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
+    const broadcastHttpUrl = syncServerUrl.replace("ws://", "http://").replace("wss://", "https://") + "/api/broadcast";
+    try {
+      await fetch(broadcastHttpUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pageId,
+          event: { type: 'ai-update', userId, blocks }
+        })
+      });
+    } catch (err) {
+      console.error("Failed to broadcast AI update", err);
+    }
+  }
+
+  private static async appendBlock(pageId: string, newBlock: any) {
+    const page = await prisma.page.findUnique({ where: { id: pageId } });
+    if (!page || !page.blockJson) throw new Error("Page not found");
+    const currentBlocks = page.blockJson as any[];
+    const newBlocks = [...currentBlocks, newBlock];
+    await prisma.page.update({ where: { id: pageId }, data: { blockJson: newBlocks as any } });
+    return newBlocks;
+  }
+
   /**
    * Internal "Brain" function: Identifies all required intents.
    * Fixed for @google/genai syntax.
@@ -58,15 +85,10 @@ export class AgentOrchestrator {
   }
 
   /**
-   * Main Execution Entry Point
+   * Determines if the intent should be streamed.
+   * Returns the clean content + action type without executing.
    */
-  static async run(content: string, userId: string, aiMessageId: string, pageId?: string) {
-    console.log("🧠 Brain identifying tasks based on tags...");
-
-    // 1. IDENTIFY
-    // Commenting out the multi-intent identifier for now
-    // const plan = await this.identifyMultiIntent(content);
-
+  static parseIntent(content: string): { actionType: string; cleanContent: string } {
     let actionType = 'chat';
     let cleanContent = content;
 
@@ -96,45 +118,173 @@ export class AgentOrchestrator {
       cleanContent = content.replace('@desmos', '').trim();
     }
 
+    return { actionType, cleanContent };
+  }
+
+  /**
+   * Returns a ReadableStream for streamable intents (chat, rag_create).
+   * Returns null for non-streamable intents — caller should use run() instead.
+   * The stream also handles the DB write-back via the accumulated text.
+   */
+  static async runStream(
+    content: string,
+    userId: string,
+    aiMessageId: string,
+    pageId?: string
+  ): Promise<ReadableStream<Uint8Array> | null> {
+    const { actionType, cleanContent } = this.parseIntent(content);
+
+    // Only these two intents get streamed
+    if (actionType !== 'chat' && actionType !== 'rag_create') return null;
+
+    const payload = { content: cleanContent, pageId };
+    const encoder = new TextEncoder();
+    let accumulated = '';
+
+    if (actionType === 'chat') {
+      const genStream = await ai.models.generateContentStream({
+        model: 'gemini-2.5-flash',
+        contents: [{ role: 'user', parts: [{ text: cleanContent }] }],
+        config: {
+          systemInstruction: 'You are a helpful AI assistant. Answer the user\'s query clearly.',
+        },
+      });
+
+      return new ReadableStream<Uint8Array>({
+        async start(controller) {
+          try {
+            for await (const chunk of genStream) {
+              const text = chunk.text ?? '';
+              if (text) {
+                accumulated += text;
+                controller.enqueue(encoder.encode(text));
+              }
+            }
+          } catch (err) {
+            console.error('Chat stream error:', err);
+          } finally {
+            // Persist final message to DB BEFORE closing so refetch() sees the complete row
+            try {
+              await prisma.message.update({
+                where: { id: aiMessageId },
+                data: { content: accumulated, isComplete: true },
+              });
+            } catch (e: any) {
+              console.error('DB update error:', e);
+            }
+            controller.close();
+          }
+        },
+      });
+    }
+
+    // rag_create
+    // We need to resolve the page first (async), then stream
+    const page = await prisma.page.findUnique({ where: { id: pageId! } });
+    // @ts-ignore
+    if (!page || !page.geminiFileUri) {
+      // Not streamable — return null and let run() handle the error message
+      return null;
+    }
+
+    // @ts-ignore
+    let contentParts: any[] = [{ fileData: { fileUri: page.geminiFileUri, mimeType: 'application/pdf' } }, { text: cleanContent }];
+    let reqConfig: any = { systemInstruction: "You are an expert assistant. Answer the user's query based ONLY on the attached cached document. If the answer is not in the document, reply that you don't know." };
+    // @ts-ignore
+    if (page.geminiCacheName) {
+      // @ts-ignore
+      reqConfig.cachedContent = page.geminiCacheName;
+      contentParts = [{ text: cleanContent }];
+    }
+
+    const ragStream = await ai.models.generateContentStream({
+      model: 'gemini-2.5-flash',
+      contents: [{ role: 'user', parts: contentParts }],
+      config: reqConfig,
+    });
+
+    return new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          for await (const chunk of ragStream) {
+            const text = chunk.text ?? '';
+            if (text) {
+              accumulated += text;
+              controller.enqueue(encoder.encode(text));
+            }
+          }
+        } catch (err) {
+          console.error('RAG stream error:', err);
+        } finally {
+          // Persist BEFORE closing so refetch() sees the complete row
+          try {
+            await prisma.message.update({
+              where: { id: aiMessageId },
+              data: { content: accumulated, isComplete: true },
+            });
+          } catch (e: any) {
+            console.error('DB update error:', e);
+          }
+          controller.close();
+
+          // Log metrics (fire-and-forget is fine here)
+          const fs = require('fs');
+          const path = require('path');
+          const metricsLog = `--- RAG Query ---\nTimestamp: ${new Date().toISOString()}\nQuery: ${cleanContent}\nApprox chars: ${accumulated.length}\n\n`;
+          fs.appendFileSync(path.join(process.cwd(), 'matrix.txt'), metricsLog);
+        }
+      },
+    });
+  }
+
+  /**
+   * Main Execution Entry Point (non-streaming intents only)
+   */
+  static async run(content: string, userId: string, aiMessageId: string, pageId?: string) {
+    console.log('🧠 Brain identifying tasks based on tags...');
+
+    const { actionType, cleanContent } = this.parseIntent(content);
+
     const payload = {
       topic: cleanContent,
       content: cleanContent,
       query: cleanContent,
       instructions: cleanContent,
-      pageId // Pass pageId down into the payload
+      pageId,
     };
 
     let result;
 
-    // 2. EXECUTE BASED ON TAG
     try {
       switch (actionType) {
         case 'animation_create':
           result = await this.handleAnimation(payload, userId);
           break;
         case 'video_create':
-          result = await this.handleVideo(payload);
+          result = await this.handleVideo(payload, userId);
           break;
         case 'page_update':
           result = await this.handlePageUpdate(payload, userId);
           break;
         case 'diagram_create':
-          result = await this.handleDiagram(payload);
+          result = await this.handleDiagram(payload, userId);
           break;
         case 'p5_create':
-          result = await this.handleP5(payload);
+          result = await this.handleP5(payload, userId);
           break;
         case 'react_flow_create':
-          result = await this.handleReactFlow(payload);
+          result = await this.handleReactFlow(payload, userId);
           break;
         case 'rag_create':
+          // Fallback for when runStream() returned null (no PDF attached)
           result = await this.handleRag(payload);
           break;
         case 'desmos_create':
-          result = await this.handleDesmos(payload);
+          result = await this.handleDesmos(payload, userId);
           break;
         case 'chat':
         default:
+          // Fallback non-streaming chat (shouldn't normally reach here)
           result = await this.handleChat(payload);
           break;
       }
@@ -143,12 +293,10 @@ export class AgentOrchestrator {
       result = { type: actionType, error: true };
     }
 
-    // 3. FINALIZE DB RECORD
-
     return {
       message: (result as any)?.message || `Processing ${actionType} intent`,
       actions: [{ type: actionType as any, payload }],
-      data: [result]
+      data: [result],
     };
   }
 
@@ -172,7 +320,7 @@ export class AgentOrchestrator {
     return { type: 'animation_create', status: 'error', message: 'Not implemented' };
   }
 
-  private static async handleP5(payload: any) {
+  private static async handleP5(payload: any, userId?: string) {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -185,52 +333,88 @@ export class AgentOrchestrator {
       });
       let rawHtml = response.text || "";
       rawHtml = rawHtml.replace(/```html/g, '').replace(/```/g, '').trim();
-      return { type: 'p5_create_success', status: 'ready', data: rawHtml };
+      
+      if (!payload.pageId) throw new Error("No pageId provided");
+      
+      const newBlock = {
+        id: `p5-${Date.now()}`,
+        type: "p5",
+        props: { code: rawHtml },
+        content: []
+      };
+      
+      const newBlocks = await this.appendBlock(payload.pageId, newBlock);
+      await this.broadcastBlocks(payload.pageId, newBlocks, userId);
+
+      return { type: 'p5_create_success', status: 'ready', data: rawHtml, message: "I've added the p5.js sketch to the page!" };
     } catch (error) {
       console.error("p5 Error:", error);
       return { type: 'p5_create', status: 'error', data: "Failed to generate p5.js sketch" };
     }
   }
 
-  private static async handleReactFlow(payload: any) {
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: payload.content }] }],
-        config: {
-          systemInstruction: `You are an expert React Flow developer. Generate a flowchart representing the user's request.
-          You must return ONLY a JSON object with two arrays: "nodes" and "edges".
-          - Nodes must follow the standard XYFlow format: { id: "1", position: { x: 0, y: 0 }, data: { label: "Text" } }
-          - Edges must follow the standard XYFlow format: { id: "e1-2", source: "1", target: "2" }
-          Make sure nodes are spaced out logically (e.g. at least 150px apart on the X or Y axis).
-          Do NOT include markdown fencing. Return ONLY parseable JSON.`,
-          responseMimeType: "application/json"
-        }
-      });
-      let flowJson;
-      try {
-        flowJson = JSON.parse(response.text || '{"nodes":[],"edges":[]}');
-      } catch (e) {
-        throw new Error("Failed to parse React Flow JSON");
-      }
-      return { type: 'react_flow_create_success', status: 'ready', data: flowJson };
-    } catch (error) {
-      console.error("React Flow Error:", error);
-      return { type: 'react_flow_create', status: 'error', data: "Failed to generate React Flow" };
+  private static async handleReactFlow(payload: any, userId?: string) {
+    console.log("⚛️ Using hardcoded ReactFlow nodes/edges (no AI call)");
+    const hardcodedFlow = {
+      nodes: [
+        { id: '1', position: { x: 250, y: 50 }, data: { label: 'AVL Tree Root (30)' } },
+        { id: '2', position: { x: 100, y: 200 }, data: { label: 'Left Child (20)' } },
+        { id: '3', position: { x: 400, y: 200 }, data: { label: 'Right Child (40)' } },
+        { id: '4', position: { x: 25, y: 350 }, data: { label: 'LL (10)' } },
+        { id: '5', position: { x: 175, y: 350 }, data: { label: 'LR (25)' } },
+        { id: '6', position: { x: 325, y: 350 }, data: { label: 'RL (35)' } },
+        { id: '7', position: { x: 475, y: 350 }, data: { label: 'RR (50)' } },
+      ],
+      edges: [
+        { id: 'e1-2', source: '1', target: '2' },
+        { id: 'e1-3', source: '1', target: '3' },
+        { id: 'e2-4', source: '2', target: '4' },
+        { id: 'e2-5', source: '2', target: '5' },
+        { id: 'e3-6', source: '3', target: '6' },
+        { id: 'e3-7', source: '3', target: '7' },
+      ]
+    };
+    
+    if (payload.pageId) {
+      const newBlock = {
+        id: `react-flow-${Date.now()}`,
+        type: "react-flow",
+        props: {
+          nodes: JSON.stringify(hardcodedFlow.nodes),
+          edges: JSON.stringify(hardcodedFlow.edges)
+        },
+        content: []
+      };
+      
+      const newBlocks = await this.appendBlock(payload.pageId, newBlock);
+      await this.broadcastBlocks(payload.pageId, newBlocks, userId);
     }
+    
+    return { type: 'react_flow_create_success', status: 'ready', data: hardcodedFlow, message: "I've added the flow diagram." };
   }
 
-  private static async handleDesmos(payload: any) {
+  private static async handleDesmos(payload: any, userId?: string) {
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: payload.content }] }],
         config: {
           systemInstruction: `You are an expert math teacher and Desmos power user. Generate a list of Desmos calculator expressions based on the user's request.
-          You must return ONLY a JSON array of objects.
-          Each object must represent a Desmos expression with this format:
-          { "id": "graph1", "latex": "y = x^2", "color": "#c74440", "hidden": false }
-          Do NOT include markdown fencing. Return ONLY a parseable JSON array.`,
+
+CRITICAL RULES FOR DESMOS LATEX:
+1. NEVER use the raw '|' (pipe) symbol. It causes parsing errors.
+2. Domain/Range Restrictions: Use curly braces. Do NOT use '|' or ':' as separators. 
+   - Correct: y = x^2 \\{x > 0\\}
+   - Incorrect: y = x^2 | x > 0
+3. Absolute Values: Use \\operatorname{abs}(x) or \\left| x \\right|.
+4. JSON Escaping: You MUST double-escape all LaTeX backslashes so the output is valid JSON. (e.g., use \\\\frac{1}{2} instead of \\frac{1}{2}, and \\\\{x > 0\\\\} instead of \\{x > 0\\}).
+
+OUTPUT FORMAT:
+You must return ONLY a JSON array of objects.
+Each object must represent a Desmos expression with this exact format:
+{ "id": "graph1", "latex": "y = x^2", "color": "#c74440", "hidden": false }
+
+Do NOT include markdown fencing. Return ONLY a raw, parseable JSON array.`,
           responseMimeType: "application/json"
         }
       });
@@ -240,124 +424,70 @@ export class AgentOrchestrator {
       } catch (e) {
         throw new Error("Failed to parse Desmos expressions JSON");
       }
-      return { type: 'desmos_create_success', status: 'ready', data: expressions };
+      
+      if (payload.pageId) {
+        const newBlock = {
+          id: `desmos-${Date.now()}`,
+          type: "desmos",
+          props: { equations: JSON.stringify(expressions) },
+          content: []
+        };
+        
+        const newBlocks = await this.appendBlock(payload.pageId, newBlock);
+        await this.broadcastBlocks(payload.pageId, newBlocks, userId);
+      }
+      
+      return { type: 'desmos_create_success', status: 'ready', data: expressions, message: `Here's your Desmos graph! I've added ${expressions.length} expression${expressions.length !== 1 ? 's' : ''} to the graphing calculator.` };
     } catch (error) {
       console.error("Desmos Error:", error);
       return { type: 'desmos_create', status: 'error', data: "Failed to generate Desmos equations" };
     }
   }
 
-  private static async handleVideo(payload: any) {
+  private static async handleVideo(payload: any, userId?: string) {
+    console.log("🎬 Orchestrating video creation on backend");
+    
+    if (!payload.pageId) return { type: 'video_create', status: 'error', message: 'No page specified' };
+    
     try {
-      // Step 1: Refine the prompt to expand on creativity and strict constraints
-      const refineSystemPrompt = `
-        You are an expert prompt engineer specializing in creative coding ('Manim/Python'}).
-        Your goal is to take a simple user request and expand it into a DETAILED, high-quality prompt that will be used by another AI to generate the actual code.
+      // 1. Generate video via sync-server API
+      const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
+      const apiUrl = syncServerUrl.replace("ws://", "http://").replace("wss://", "https://") + "/api/generate-video";
 
-        Detailed Requirements for the Expanded Prompt:
-        1. **Clarity & Detail**: Expand concepts, describe visual elements, animations, and behaviors in depth.
-        2. **Resource Efficiency**: 
-           - **CRITICAL**: Keep the visualization efficient to avoid timeouts. 
-           - **Maximum Animations**: Limit the total number of animations to **20 or fewer**.
-           - **3D Geometry**: Avoid high-resolution 3D objects. If using \`Sphere\`, explicitly set low resolution (e.g., \`resolution=(12, 12)\`) or use \`Dot\` if possible. Avoid rendering hundreds of complex objects simultaneously.
-        3. **Aesthetics & Colors**: Suggest a modern, professional color palette. 
-           - **CRITICAL**: Suggest colors using HEX CODES (e.g., #007bff) or very standard names (e.g., "blue", "red"). 
-           - **Avoid** names like "light blue" or "dark grey" which might not be defined as constants in the target library.
-        4. **Interactivity (for p5.js)**: Explicitly mention how users should be able to interact (mouse, keyboard).
-        5. **No Code**: Do NOT generate any code. Only text describing the scene/animation.
-        6. **Technical Constraints**: 
-           - Explicitly state that the code generator must use standard, built-in constants and avoid guessing variable names for colors.
-           - **For Manim**: 
-             - Warn that \`Text\` mobjects do **NOT** accept \`text_align\` as a constructor argument.
-             - **CRITICAL**: Do **NOT** call \`obj.fix_in_frame()\`. In \`ThreeDScene\`, use \`self.add_fixed_in_frame_mobjects(obj)\` instead.
-             - **Camera Control**: Do **NOT** use \`Rotate()\` on camera attributes like \`phi\` or \`theta\`. Use \`self.move_camera(phi=..., theta=...)\` for camera orientation animations.
-             - **Rotations**: Strictly use \`about_point=...\` (NOT \`about_pt=\`) when specifying the rotation center for any mobject.
-
-        Structure your output as a single, cohesive paragraph or a list of specific instructions for the specialized code-generating AI.
-        `;
-
-      const refinedResponse = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: [{ role: "user", parts: [{ text: payload.content }] }],
-        config: { systemInstruction: refineSystemPrompt }
+      const response = await fetch(apiUrl, {     
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: manimCode }),
       });
 
-      const detailedPrompt = refinedResponse.text || payload.content;
+      if (!response.ok) throw new Error("Failed to generate video on server");
 
-      // Step 2: Generate the Manim code
-      const manimSystemPrompt = `
-        You are an expert Python developer specializing in Manim (Community Edition).
-        Your task is to write a complete, runnable Python script using Manim to visualize the user's request.
+      const blob = await response.blob();
+      const videoFile = new File([blob], "ai-video.mp4", { type: "video/mp4" });
+      
+      // 2. Upload using UTApi
+      const { UTApi } = await import("uploadthing/server");
+      const utapi = new UTApi();
+      const uploadResponse = await utapi.uploadFiles([videoFile]);
+      const url = uploadResponse[0].data?.url;
 
-        Description of requested video: "${detailedPrompt}"
+      if (!url) throw new Error("Upload failed");
 
-        Rules:
-        1.  **Imports**: Always start with \`from manim import *\`. Import \`numpy as np\` if needed.
-        2.  **Class Name**: Define a class named \`VideoScene\` that inherits from \`Scene\`.
-        3.  **Construct Method**: Implement the \`construct(self)\` method.
-        4.  **Content**: 
-            - Create clear, educational visualizations.
-            - Use \`Text\`, \`MathTex\`, \`Circle\`, \`Square\`, \`Create\`, \`FadeIn\`, \`FadeOut\`, \`Transform\`, etc.
-            - Ensure animations are smooth and well-timed (use \`self.wait()\`).
-            - Keep the total runtime reasonable (10-30 seconds).
-        5.  **Output**: Return ONLY the Python code. Do not include markdown formatting like \`\`\`python ... \`\`\`.
-        6.  **Error Handling**: Ensure the code is syntactically correct and uses valid Manim Community v0.17+ syntax.
-        7.  **Assets**: Do NOT use any external files (images, SVGs, sounds). Use only built-in Manim shapes (Circle, Square, etc) and text.
-        8.  **Colors**: 
-            - Use standard Manim color constants (e.g., \`BLUE\`, \`RED\`, \`WHITE\`, \`YELLOW\`, \`GREEN\`, \`ORANGE\`, \`PURPLE\`, \`PINK\`, \`TEAL\`, \`GOLD\`, \`MAROON\`, \`SCARLET\`).
-            - **NEVER** use names like \`LIGHT_BLUE\`, \`DARK_GREY\`, or any other guessed color names.
-            - If you need a specific shade, define it with a Hex code: \`S_COLOR = "#ADD8E6"\`.
-        9.  **Library Defaults**: Stick to standard \`Scene\` or \`ThreeDScene\` methods. Do not assume existence of unimported utilities.
-        10. **Text Alignment**: 
-            - **CRITICAL**: The \`Text\` class does **NOT** accept a \`text_align\` argument. 
-            - To align text, use \`Tex\` with \`alignment\` (e.g., \`Tex("...", alignment="\\\\\\RaggedRight")\`) or manually position mobjects using \`obj.next_to(other_obj, DOWN)\`.
-            - Ensure all keyword arguments passed to \`Text\`, \`Tex\`, or \`Circle\` are valid per Manim Community standards.
-        11. **3D Scenes**:
-            - If using \`ThreeDScene\`, do **NOT** call \`obj.fix_in_frame()\`. This method does not exist on mobjects.
-            - Instead, use \`self.add_fixed_in_frame_mobjects(obj)\` to keep UI elements or text fixed relative to the camera.
-        12. **Camera Rotation & Movement**:
-            - **CRITICAL**: Do **NOT** use \`self.camera.animate\`. This will cause an AttributeError.
-            - **CRITICAL**: Do **NOT** use \`Rotate(self.camera.phi, ...)\` or \`Rotate(self.camera.theta, ...)\`.
-            - To animate camera movement/rotation, use \`self.move_camera(phi=NEW_PHI, theta=NEW_THETA, focal_distance=..., run_time=...)\`.
-            - To start a continuous rotation, use \`self.begin_ambient_camera_rotation(rate=...)\`.
-        13. **Rotation Arguments**:
-            - **CRITICAL**: The keyword argument for specifying a rotation center is \`about_point\`. 
-            - **NEVER** use \`about_pt\`, as this will cause a \`TypeError\`.
-        14. **Performance & Complexity**:
-            - **CRITICAL**: Keep the scene simple to ensure it renders within 5 minutes.
-            - **Animations**: Stick to standard animations: \`Create\`, \`Uncreate\`, \`FadeIn\`, \`FadeOut\`, \`Write\`, \`Transform\`, \`ReplacementTransform\`. 
-            - **NEVER** use hallucinated composite animations like \`ShrinkAndFadeOut\`.
-            - **Limit Objects**: Do not create or animate more than 15-20 mobjects in a single scene.
-            - **Sphere Resolution**: If using \`Sphere\`, **ALWAYS** use low resolution: \`Sphere(radius=..., resolution=(12, 12))\`. Default resolution is too high and will cause timeouts.
-            - **Limit Transforms**: Avoid complex \`Transform\` or \`ReplacementTransform\` on high-resolution geometry.
-        15. **Positioning Constants**:
-            - **CRITICAL**: Use only standard Manim direction constants: \`UP\`, \`DOWN\`, \`LEFT\`, \`RIGHT\`, \`ORIGIN\`, \`IN\`, \`OUT\`, \`UL\`, \`UR\`, \`DL\`, \`DR\`.
-            - **NEVER** use \`TOP\` or \`BOTTOM\`. Use \`UP\` or \`DOWN\` instead (e.g., \`obj.to_edge(UP)\`).
-            - **NEVER** use \`CENTER\`. Use \`ORIGIN\` if you mean the center of the scene.
-
-        Example Structure:
-        from manim import *
-
-        class VideoScene(Scene):
-            def construct(self):
-                t = Text("Hello World")
-                self.play(Write(t))
-                self.wait()
-        `;
-
-      const codeResponse = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [{ role: "user", parts: [{ text: manimSystemPrompt }] }]
-      });
-
-      let rawCode = codeResponse.text || "";
-      rawCode = rawCode.replace(/```python/g, '').replace(/```/g, '').trim();
-
-      // IMPORTANT: In useStreamingChat, we look for `video_create_success` inside `jsonData.type`
-      return { type: 'video_create_success', status: 'ready', data: rawCode };
-    } catch (error) {
-      console.error("Video Error:", error);
-      return { type: 'video_create', status: 'error', data: "Failed to generate video" };
+      // 3. Update DB & Broadcast
+      const newBlock = {
+        id: `video-${Date.now()}`,
+        type: "video",
+        props: { url },
+        content: []
+      };
+      
+      const newBlocks = await this.appendBlock(payload.pageId, newBlock);
+      await this.broadcastBlocks(payload.pageId, newBlocks, userId);
+      
+      return { type: 'video_create_success', status: 'ready', message: "Video generated and added to the page!" };
+    } catch (e) {
+      console.error("Video backend error", e);
+      return { type: 'video_create_success', status: 'ready', message: "Failed to generate video." };
     }
   }
 
@@ -376,26 +506,31 @@ export class AgentOrchestrator {
       const currentBlocks = page.blockJson as any[];
 
       // 2. Ask Gemini for changes
-      const prompt = `
-        The user wants to update their document: "${payload.content}"
-        
-        Here is the current JSON array of BlockNote blocks:
-        ${JSON.stringify(currentBlocks, null, 2)}
-        
-        Analyze the blocks and return a JSON array containing ONLY the updates needed. 
-        Each update object should look like this:
-        {
-           "targetBlockId": "the-id-of-the-block-to-update",
-           "originalType": "the-original-block-type-like-paragraph",
-           "originalContent": "the original text content of the block",
-           "newType": "the requested block type (e.g. 'heading', 'paragraph', 'bulletListItem')",
-           "newProps": {"level": 1}, // JSON object combining original props with NEW requested styling props (like 'level' for headings, 'textColor', 'textAlignment', etc.)
-           "newContent": "the requested new text content for the block",
-           "explanation": "Short explanation of why this was changed including the styling changes"
-        }
+      const prompt = `The user wants to perform an action on their document. 
 
-        Return ONLY a JSON array of these objects, no markdown formatting.
-      `;
+USER REQUEST: "${payload.content}"
+
+CURRENT DOCUMENT STATE (JSON array of BlockNote blocks):
+${JSON.stringify(currentBlocks, null, 2)}
+
+TASK:
+1.  **Analyze Intent**: Determine if the user is asking to UPDATE specific existing content or EXPLAIN/GENERATE new detailed content.
+2.  **Structure the Response**: If explaining a concept, do not return a single block. Use a logical structure including headings (h1, h2, h3), paragraphs, and bulletListItem blocks to make the explanation clear.
+3.  **Mapping Updates**: 
+    - For existing blocks being modified, provide the 'targetBlockId'.
+    - For NEW blocks being created to satisfy an explanation or expansion, use the ID "NEW_BLOCK_[index]" and specify where it should logically go.
+
+Return ONLY a JSON array of update/creation objects. Each object must follow this schema:
+{
+    "targetBlockId": "the-id-of-the-existing-block-OR-new-id",
+    "action": "update" | "insert_after" | "insert_before",
+    "newType": "heading" | "paragraph" | "bulletListItem" | "numberedListItem",
+    "newProps": { "level": 1, "textColor": "default", "backgroundColor": "default", "textAlignment": "left" },
+    "newContent": "the text content",
+    "explanation": "Reason for this block creation or change"
+}
+
+Ensure the output is a raw JSON array. No markdown code blocks, no preamble, and no conversational text.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -447,7 +582,7 @@ export class AgentOrchestrator {
       });
 
       // 6. Broadcast via WebSockets
-      const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
+      const syncServerUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
       // Ensure we hit the HTTP broadcast endpoint, not the WS connection
       const broadcastHttpUrl = syncServerUrl.replace("ws://", "http://").replace("wss://", "https://") + "/api/broadcast";
 
@@ -476,21 +611,30 @@ export class AgentOrchestrator {
     }
   }
 
-  private static async handleDiagram(payload: any) {
+  private static async handleDiagram(payload: any, userId?: string) {
+    console.log("📊 Using hardcoded Mermaid diagram (no AI call)");
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: payload.content }] }],
-        config: {
-          systemInstruction: "You are an expert Mermaid.js developer. Generate valid Mermaid diagram code specifically a 'flowchart TD' or 'graph flowTD' based on the user's request. Output ONLY the raw mermaid code, no markdown fencing, no explanations."
-        }
-      });
-      let rawMermaid = response.text || "";
-      rawMermaid = rawMermaid.replace(/```mermaid/g, '').replace(/```/g, '').trim();
-      return { type: 'diagram_create_success', status: 'ready', data: rawMermaid };
-    } catch (error) {
-      console.error("Diagram Error:", error);
-      return { type: 'diagram_create', status: 'error', data: "Failed to generate diagram" };
+      if (payload.pageId) {
+        const { parseMermaidToExcalidraw } = await import("@excalidraw/mermaid-to-excalidraw");
+        const { elements, files } = await parseMermaidToExcalidraw(mermaidCode);
+        
+        const newBlock = {
+            id: `diagram-${Date.now()}`,
+            type: "diagram",
+            props: {
+                elements: JSON.stringify(elements),
+                files: files ? JSON.stringify(files) : null
+            },
+            content: []
+        };
+        
+        const newBlocks = await this.appendBlock(payload.pageId, newBlock);
+        await this.broadcastBlocks(payload.pageId, newBlocks, userId);
+      }
+      return { type: 'diagram_create_success', status: 'ready', data: mermaidCode, message: "I've added the diagram!" };
+    } catch (e) {
+      console.error("Diagram error", e);
+      return { type: 'diagram_create_success', status: 'ready', message: "Failed to parse diagram on server." };
     }
   }
 

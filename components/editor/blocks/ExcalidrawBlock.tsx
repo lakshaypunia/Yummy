@@ -23,6 +23,9 @@ export const ExcalidrawBlock = createReactBlockSpec(
             files: {
                 default: "null",
             },
+            mermaidCode: {
+                default: "",
+            },
         },
         content: "none",
     },
@@ -30,7 +33,7 @@ export const ExcalidrawBlock = createReactBlockSpec(
         render: (props) => {
             // Use local state to handle real-time changes without causing infinite loops
             // We only want to push to BlockNote's props.update on idle/debounced changes
-            const [initialData] = useState({
+            const [initialData, setInitialData] = useState({
                 elements: typeof props.block.props.elements === "string" ? JSON.parse(props.block.props.elements) : [],
                 appState: (() => {
                     if (typeof props.block.props.appState !== "string") return null;
@@ -48,6 +51,51 @@ export const ExcalidrawBlock = createReactBlockSpec(
                 })(),
                 files: typeof props.block.props.files === "string" ? JSON.parse(props.block.props.files) : null,
             });
+
+            const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
+
+            // Parse mermaid code if it exists and elements are empty
+            useEffect(() => {
+                const parseMermaid = async () => {
+                    const code = props.block.props.mermaidCode;
+                    if (code && typeof code === "string" && code.trim() !== "") {
+                        // Check if we already have elements so we don't re-parse constantly
+                        if (!initialData.elements || initialData.elements.length === 0) {
+                            if (!excalidrawAPI) return; // Wait until Excalidraw is fully mounted
+                            
+                            try {
+                                const { parseMermaidToExcalidraw } = await import("@excalidraw/mermaid-to-excalidraw");
+                                const { elements, files } = await parseMermaidToExcalidraw(code);
+                                
+                                setInitialData(prev => ({
+                                    ...prev,
+                                    elements,
+                                    files
+                                }));
+
+                                excalidrawAPI.updateScene({ elements });
+                                if (files) {
+                                    excalidrawAPI.addFiles(Object.values(files));
+                                }
+
+                                // Also update the block so it gets saved to DB and syncs to others
+                                props.editor.updateBlock(props.block, {
+                                    type: "excalidraw",
+                                    props: {
+                                        ...props.block.props,
+                                        elements: JSON.stringify(elements),
+                                        files: JSON.stringify(files),
+                                        mermaidCode: "" // clear it so we don't re-parse
+                                    },
+                                });
+                            } catch (e) {
+                                console.error("Failed to parse mermaid on client:", e);
+                            }
+                        }
+                    }
+                };
+                parseMermaid();
+            }, [props.block.props.mermaidCode, initialData.elements, props.editor, props.block, excalidrawAPI]);
 
             const onChange = useCallback(
                 (elements: readonly any[], appState: any, files: any) => {
@@ -72,6 +120,7 @@ export const ExcalidrawBlock = createReactBlockSpec(
                     {/* Height determines how large the block appears in the document */}
                     <div className="w-full aspect-video">
                         <ExcalidrawWrapper
+                            excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
                             initialData={initialData}
                             onChange={onChange}
                             UIOptions={{

@@ -124,7 +124,7 @@ export default async function Home() {
       {/* Footer */}
       <footer className="relative z-10 flex items-center justify-center px-6 py-4 border-t border-[var(--color-border-primary)]/40">
         <p className="text-[11px] text-[var(--color-text-muted)]/60 tracking-wide">
-          Pre-MVP · v0.0 · Built by Lakshay Diwan
+          Pre-MVP · v0.0 · Built by Lakshay Diwan and Lakshay Punia
         </p>
       </footer>
 

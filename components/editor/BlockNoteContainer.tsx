@@ -79,7 +79,9 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         if (!editor || !initialContent || initialContent.length === 0) return;
 
         // This checks if the document is essentially the default empty state
-        const isEmpty = editor.document.length === 1 && editor.document[0].type === "paragraph" && !editor.document[0].content;
+        const isEmpty = editor.document.length === 1 && 
+                        editor.document[0].type === "paragraph" && 
+                        (!editor.document[0].content || (Array.isArray(editor.document[0].content) && editor.document[0].content.length === 0));
 
         if (isEmpty) {
             console.log("Seeding Yjs document from PostgreSQL...");
@@ -201,36 +203,51 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
         const handleInsertP5Block = (e: Event) => {
             const customEvent = e as CustomEvent;
             const { code } = customEvent.detail;
-            const currentBlock = editor.getTextCursorPosition().block;
-
-            if (currentBlock.type === "paragraph" && !currentBlock.content) {
-                editor.replaceBlocks([currentBlock], [{ type: "p5_block", props: { code } }]);
-            } else {
-                editor.insertBlocks([{ type: "p5_block", props: { code } }], currentBlock, "after");
+            try {
+                const currentBlock = editor.getTextCursorPosition().block;
+                if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                    editor.replaceBlocks([currentBlock], [{ type: "p5_block", props: { code } }]);
+                } else {
+                    editor.insertBlocks([{ type: "p5_block", props: { code } }], currentBlock, "after");
+                }
+            } catch {
+                // Cursor not in editor (e.g. chat input focused) — insert at end
+                const lastBlock = editor.document[editor.document.length - 1];
+                editor.insertBlocks([{ type: "p5_block", props: { code } }], lastBlock, "after");
             }
         };
 
         const handleInsertReactFlowBlock = (e: Event) => {
             const customEvent = e as CustomEvent;
             const { nodes, edges } = customEvent.detail;
-            const currentBlock = editor.getTextCursorPosition().block;
-
-            if (currentBlock.type === "paragraph" && !currentBlock.content) {
-                editor.replaceBlocks([currentBlock], [{ type: "react_flow", props: { nodes, edges } }]);
-            } else {
-                editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], currentBlock, "after");
+            try {
+                const currentBlock = editor.getTextCursorPosition().block;
+                if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                    editor.replaceBlocks([currentBlock], [{ type: "react_flow", props: { nodes, edges } }]);
+                } else {
+                    editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], currentBlock, "after");
+                }
+            } catch {
+                // Cursor not in editor (e.g. chat input focused) — insert at end
+                const lastBlock = editor.document[editor.document.length - 1];
+                editor.insertBlocks([{ type: "react_flow", props: { nodes, edges } }], lastBlock, "after");
             }
         };
 
         const handleInsertDesmosBlock = (e: Event) => {
             const customEvent = e as CustomEvent;
             const { equations } = customEvent.detail;
-            const currentBlock = editor.getTextCursorPosition().block;
-
-            if (currentBlock.type === "paragraph" && !currentBlock.content) {
-                editor.replaceBlocks([currentBlock], [{ type: "desmos", props: { equations } }]);
-            } else {
-                editor.insertBlocks([{ type: "desmos", props: { equations } }], currentBlock, "after");
+            try {
+                const currentBlock = editor.getTextCursorPosition().block;
+                if (currentBlock.type === "paragraph" && !currentBlock.content) {
+                    editor.replaceBlocks([currentBlock], [{ type: "desmos", props: { equations } }]);
+                } else {
+                    editor.insertBlocks([{ type: "desmos", props: { equations } }], currentBlock, "after");
+                }
+            } catch {
+                // Cursor not in editor (e.g. chat input focused) — insert at end
+                const lastBlock = editor.document[editor.document.length - 1];
+                editor.insertBlocks([{ type: "desmos", props: { equations } }], lastBlock, "after");
             }
         };
 
@@ -259,8 +276,7 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
     if (!editor) return null;
 
     return (
-        <div className="flex-1 overflow-y-auto w-full py-2 px-2 sm:px-4">
-            <BlockNoteView
+    <div className="flex-1 pt-12 md:pt-20 overflow-y-auto w-full py-2 px-2 sm:px-4">            <BlockNoteView
                 editor={editor}
                 theme="light"
                 editable={editable}
@@ -302,7 +318,7 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
 
         // Connect to our Custom Node Sync Server 
         // We use the pageId as the unique "Room" identifier
-        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:3000";
+        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
         const yProvider = new WebsocketProvider(
             wsUrl,
             pageId,

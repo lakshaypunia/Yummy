@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 
 // Initialize the Google Generative AI client
 // Ensure GEMINI_API_KEY is available in your .env.local file
-export const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+export const ai = new GoogleGenAI({  vertexai: true, project : "gen-lang-client-0792769692", location : "global" });
 
 export interface AIResponse {
     intent: 'chat' | 'page_update' | 'video_create' | 'animation_create';

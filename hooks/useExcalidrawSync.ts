@@ -11,8 +11,9 @@ export const useExcalidrawSync = (excalidrawAPI: any, spaceId: string) => {
         if (!excalidrawAPI) return;
 
         const doc = new Y.Doc();
+        const wsUrl = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:1234";
         const provider = new WebsocketProvider(
-            "ws://localhost:1234",
+            wsUrl,
             `whiteboard-${spaceId}`,
             doc
         );

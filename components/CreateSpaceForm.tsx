@@ -18,10 +18,10 @@ export function CreateSpaceModal() {
         setIsLoading(true);
         const result = await createSpace(name);
 
-        if (result.success && result.spaceId) {
+        if (result.success && result.spaceId && result.pageId) {
             setIsOpen(false);
             setName("");
-            router.push(`/dashboard/spaces/${result.spaceId}`);
+            router.push(`/dashboard/spaces/${result.spaceId}/pages/${result.pageId}`);
         } else {
             console.error(result.error);
             setIsLoading(false);

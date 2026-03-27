@@ -101,10 +101,14 @@ export async function createSpace(name: string) {
                     }
                 }
             },
+            include: {
+                pages: { take: 1 }
+            }
         });
 
+        const rootPageId = space.pages[0]?.id;
         revalidatePath("/dashboard");
-        return { success: true, spaceId: space.id };
+        return { success: true, spaceId: space.id, pageId: rootPageId };
     } catch (error) {
         console.error("Failed to create space:", error);
         return { success: false, error: "Failed to create space" };

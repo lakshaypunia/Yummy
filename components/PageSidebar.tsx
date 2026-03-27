@@ -83,8 +83,10 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
                 const publishState = isOwner;
                 const res = await fetch(
                     `/api/livekit/get-token?room=space-${spaceId}&participantName=${encodeURIComponent(
+                        user.id  // Use unique Clerk ID as the identity; prevents collision with other users
+                    )}&canPublish=${publishState}&displayName=${encodeURIComponent(
                         user.username || user.firstName || user.id
-                    )}&canPublish=${publishState}`
+                    )}`
                 );
                 const data = await res.json();
                 if (data.token) {

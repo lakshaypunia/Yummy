@@ -30,3 +30,8 @@ Prompt Tokens: 4174
 Candidates Tokens: 797
 Total Tokens: 7222
 
+--- RAG Query ---
+Timestamp: 2026-03-20T16:14:56.446Z
+Query: give the summary of the pdf
+Approx chars: 3498
+
