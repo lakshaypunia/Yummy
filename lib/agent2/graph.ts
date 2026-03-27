@@ -48,6 +48,7 @@ export async function runAgent(params: {
   userId: string
   aiMessageId: string
   pageId?: string
+  selectedDocs?: any[]
 }) {
   console.log(`\n======================================================`)
   console.log(`[Agent - Lifecycle] runAgent invoked for user: ${params.userId}, page: ${params.pageId ?? 'None'}`)
@@ -65,6 +66,7 @@ export async function runAgent(params: {
       userId:       params.userId,
       aiMessageId:  params.aiMessageId,
       pageId:       params.pageId ?? null,
+      selectedDocs: params.selectedDocs ?? [],
       stepResults:  { clear: true } as any,
     },
     { configurable: { thread_id: threadId } }

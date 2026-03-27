@@ -8,6 +8,7 @@ interface Message {
     content: string;
     isComplete: boolean;
     createdAt?: Date;
+    attachments?: any[];
 }
 
 interface UseStreamingChatOptions {
@@ -63,7 +64,7 @@ export function useStreamingChat({
     });
 
     const sendMessage = useCallback(
-        async (content: string) => {
+        async (content: string, selectedDocs: any[] = []) => {
             const token = await getToken();
             if (!content.trim() || isStreaming) return;
 
@@ -80,6 +81,7 @@ export function useStreamingChat({
                 content,
                 isComplete: true,
                 createdAt: new Date(),
+                attachments: selectedDocs,
             };
 
             const aiMessageId = `ai-${Date.now()}`;
@@ -107,6 +109,7 @@ export function useStreamingChat({
                         chatId,
                         content,
                         pageId,
+                        selectedDocs,
                     }),
                     signal: controller.signal,
                 });

@@ -21,7 +21,7 @@ export async function loadContextNode(state: AgentState): Promise<Partial<AgentS
   }
 
   // @ts-ignore
-  const hasPdf = !!page.geminiFileUri
+  const hasPdf = (state.selectedDocs && state.selectedDocs.length > 0) || !!page.geminiFileUri
   // @ts-ignore
   const pdfFileUri = page.geminiFileUri || null
   const currentBlocks = (page.blockJson as any[]) || []
@@ -31,5 +31,6 @@ export async function loadContextNode(state: AgentState): Promise<Partial<AgentS
     hasPdf,
     pdfFileUri,
     currentBlocks,
+    selectedDocs: state.selectedDocs ?? [],
   }
 }

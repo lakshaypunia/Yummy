@@ -10,11 +10,11 @@ export async function POST(req: NextRequest) {
         const { userId } = await auth();
         if (!userId) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-        const { chatId, content, pageId } = await req.json();
+        const { chatId, content, pageId, selectedDocs } = await req.json();
 
         // 1. Persist user message
         await prisma.message.create({
-            data: { chatId, role: "USER", content, isComplete: true },
+            data: { chatId, role: "USER", content, isComplete: true, attachments: selectedDocs || [] },
         });
 
         // 2. Create placeholder AI message
@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
                 userMessage: content,
                 userId,
                 aiMessageId: aiMessage.id,
-                pageId
+                pageId,
+                selectedDocs
             });
 
             return NextResponse.json({

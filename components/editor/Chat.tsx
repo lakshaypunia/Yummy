@@ -6,15 +6,18 @@ import { useQueryClient } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
 import { useStreamingChat } from "@/hooks/useSendChat"
 import ReactMarkdown from "react-markdown"
+import { getSpaceDocuments } from "@/lib/actions/document.actions"
+import { Paperclip, X, FileText } from "lucide-react"
 
 interface ChatProps {
     chatId: string;
     pageId: string;
+    spaceId?: string;
     viewMode?: 'top' | 'side';
     onMinimizeSideChat?: () => void;
 }
 
-export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideChat }: ChatProps) {
+export default function Chat({ chatId, pageId, spaceId, viewMode = 'top', onMinimizeSideChat }: ChatProps) {
     const queryClient = useQueryClient();
     const [userQuery, setUserQuery] = useState("")
 
@@ -22,6 +25,11 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     const dropdownRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
     const scrollRef = useRef<HTMLDivElement>(null)
+
+    const [isDocSelectorOpen, setIsDocSelectorOpen] = useState(false)
+    const [spaceDocs, setSpaceDocs] = useState<any[]>([])
+    const [selectedDocs, setSelectedDocs] = useState<any[]>([])
+    const [isLoadingDocs, setIsLoadingDocs] = useState(false)
 
     const {
         messages: chatmessages,
@@ -49,6 +57,31 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
     }, [chatmessages.length, viewMode])
 
     const isTop = viewMode === 'top';
+
+    const loadSpaceDocs = async () => {
+        if (!spaceId) return;
+        setIsLoadingDocs(true);
+        const res = await getSpaceDocuments(spaceId);
+        if (res.success && res.documents) {
+            setSpaceDocs(res.documents.filter((d: any) => d.type.includes("pdf")));
+        }
+        setIsLoadingDocs(false);
+    };
+
+    const toggleDocSelector = async () => {
+        if (!isDocSelectorOpen) {
+            await loadSpaceDocs();
+        }
+        setIsDocSelectorOpen(!isDocSelectorOpen);
+    };
+
+    const handleSelectDoc = (doc: any) => {
+        if (selectedDocs.find(d => d.id === doc.id)) {
+            setSelectedDocs(selectedDocs.filter(d => d.id !== doc.id));
+        } else {
+            setSelectedDocs([...selectedDocs, doc]);
+        }
+    };
 
     /* ─── Top-mode floating input bar ─────────────────────────────── */
     // No messages → vertically centred; has messages → pinned to bottom
@@ -184,6 +217,18 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                                             `}
                                         >
                                             <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                            
+                                            {/* Render attachments if any */}
+                                            {msg.attachments && msg.attachments.length > 0 && (
+                                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                                    {msg.attachments.map((doc: any, i: number) => (
+                                                        <div key={i} className="flex items-center gap-1 px-2 py-1 bg-[var(--color-background)]/50 border border-[var(--color-border-primary)]/50 rounded-md text-[10px] text-[var(--color-text-secondary)] shadow-sm">
+                                                            <FileText size={10} className="text-blue-500 shrink-0" />
+                                                            <span className="truncate max-w-[150px]" title={doc.name}>{doc.name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         /* Streaming indicator */
@@ -209,7 +254,26 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
 
             {/* ── Input Bar ──────────────────────────────────────────── */}
             <div className={isTop ? topInputBar : sideInputBar}>
-                <div className="flex items-center gap-2 w-full">
+                <div className="flex flex-col w-full">
+                    {/* Render Selected Docs before sending */}
+                    {selectedDocs.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pb-2 border-b border-[var(--color-border-primary)]/30 mb-2">
+                            {selectedDocs.map((doc: any, i: number) => (
+                                <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--color-primary)]/40 border border-[var(--color-border-primary)]/60 text-[10px] text-[var(--color-text-primary)]">
+                                    <FileText size={10} className="text-blue-500 shrink-0" />
+                                    <span className="truncate max-w-[120px] font-medium" title={doc.name}>{doc.name}</span>
+                                    <button 
+                                        onClick={(e) => { e.preventDefault(); handleSelectDoc(doc); }}
+                                        className="text-[var(--color-text-muted)] hover:text-red-400 p-0.5 rounded-full hover:bg-[var(--color-background)] transition-colors"
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 w-full">
                     {/* Side-mode: minimize button */}
                     {!isTop && onMinimizeSideChat && (
                         <button
@@ -227,10 +291,63 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                         </button>
                     )}
 
-                    {/* Top-mode: plus icon */}
-                    {isTop && (
-                        <div className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-[var(--color-primary)]/20 text-[var(--color-text-muted)]">
-                            <Plus size={14} strokeWidth={2} />
+                    {/* Document attachment button */}
+                    {spaceId && (
+                        <div className="relative">
+                            <button
+                                onClick={toggleDocSelector}
+                                className={`shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 ${selectedDocs.length > 0 ? "bg-blue-500/20 text-blue-500 hover:bg-blue-500/30" : "bg-[var(--color-primary)]/20 text-[var(--color-text-muted)] hover:bg-[var(--color-primary)]/30 hover:text-[var(--color-text-primary)]"}`}
+                                title="Attach PDF"
+                            >
+                                <Paperclip size={14} strokeWidth={2} />
+                            </button>
+                            
+                            {/* Document Selector Dropdown */}
+                            <AnimatePresence>
+                                {isDocSelectorOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute bottom-full left-0 mb-2 w-64 bg-[var(--color-card)] border border-[var(--color-border-primary)] rounded-xl shadow-xl z-50 overflow-hidden"
+                                    >
+                                        <div className="p-2 border-b border-[var(--color-border-primary)] flex justify-between items-center bg-[var(--color-primary)]/10">
+                                            <span className="text-xs font-semibold text-[var(--color-text-primary)]">Select PDFs</span>
+                                            <button onClick={() => setIsDocSelectorOpen(false)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                        <div className="p-2 max-h-48 overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
+                                            {isLoadingDocs ? (
+                                                <div className="flex justify-center p-4">
+                                                    <Loader2 size={16} className="animate-spin text-[var(--color-text-muted)]" />
+                                                </div>
+                                            ) : spaceDocs.length === 0 ? (
+                                                <div className="text-xs text-center p-4 text-[var(--color-text-muted)]">
+                                                    No PDFs found in this space.
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-1">
+                                                    {spaceDocs.map((doc) => {
+                                                        const isSelected = !!selectedDocs.find(d => d.id === doc.id);
+                                                        return (
+                                                            <div 
+                                                                key={doc.id}
+                                                                onClick={() => handleSelectDoc(doc)}
+                                                                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs transition-colors ${isSelected ? "bg-blue-500/10 text-blue-400" : "hover:bg-[var(--color-primary)] text-[var(--color-text-primary)]"}`}
+                                                            >
+                                                                <FileText size={14} className={isSelected ? "text-blue-500" : "text-[var(--color-text-muted)]"} />
+                                                                <span className="truncate flex-1">{doc.name}</span>
+                                                                {isSelected && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     )}
 
@@ -245,8 +362,11 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                             if (e.key === "Enter" && userQuery.trim() !== "" && !isStreaming) {
                                 e.preventDefault();
                                 const query = userQuery;
+                                const docs = [...selectedDocs];
                                 setUserQuery("");
-                                await sendMessage(query);
+                                setSelectedDocs([]);
+                                setIsDocSelectorOpen(false);
+                                await sendMessage(query, docs);
                             }
                         }}
                         type="text"
@@ -266,8 +386,11 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                         disabled={userQuery.trim() === "" || isStreaming}
                         onClick={async () => {
                             const query = userQuery;
+                            const docs = [...selectedDocs];
                             setUserQuery("");
-                            await sendMessage(query);
+                            setSelectedDocs([]);
+                            setIsDocSelectorOpen(false);
+                            await sendMessage(query, docs);
                         }}
                         className="
                             shrink-0 w-7 h-7 flex items-center justify-center rounded-lg
@@ -284,6 +407,7 @@ export default function Chat({ chatId, pageId, viewMode = 'top', onMinimizeSideC
                             : <ArrowUp size={14} strokeWidth={2} />
                         }
                     </button>
+                </div>
                 </div>
             </div>
 

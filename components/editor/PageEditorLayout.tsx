@@ -183,6 +183,7 @@ export function PageEditorLayout({
                         <Chat
                             chatId={chatId}
                             pageId={pageId}
+                            spaceId={spaceId}
                             viewMode="side"
                             onMinimizeSideChat={() => setIsSideChatMinimized(true)}
                         />

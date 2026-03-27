@@ -12,6 +12,7 @@ export const AgentStateAnnotation = Annotation.Root({
   hasPdf:         Annotation<boolean>,
   pdfFileUri:     Annotation<string | null>,
   currentBlocks:  Annotation<any[]>,
+  selectedDocs:   Annotation<any[]>,
 
   // ── Plan (set by planner node) ───────────────────────
   mode:     Annotation<'chat' | 'agent'>,

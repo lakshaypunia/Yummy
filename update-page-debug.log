@@ -2001,3 +2001,560 @@ INPUT: {
 }
 Saving blocks to DB. Length: 2
 Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-27T19:06:47.243Z ---
+INPUT: {
+  "pageId": "8aa3f1fc-1a12-40dd-a2b2-6b7fce5c5947",
+  "blockType": "text",
+  "data": "This chapter introduces acids, bases, and salts, highlighting their fundamental properties and reactions.\n\n**Key Concepts:**\n\n1.  **Definitions and Indicators:**\n    *   Acids are typically sour and turn blue litmus red. Bases are bitter and turn red litmus blue.\n    *   **Indicators** (like litmus, turmeric, phenolphthalein, methyl orange) change color to identify acids and bases.\n    *   **Olfactory indicators** (like onion, vanilla, clove) change their odor in acidic or basic media.\n\n2.  **Chemical Reactions of Acids and Bases:**\n    *   **Acids with Metals:** Acids react with certain metals to produce a salt and hydrogen gas (e.g., Zinc + H₂SO₄ → ZnSO₄ + H₂).\n    *   **Bases with Metals:** Some bases react with metals to produce a salt and hydrogen gas (e.g., NaOH + Zn → Na₂ZnO₂ + H₂).\n    *   **Acids with Metal Carbonates/Hydrogencarbonates:** Acids react to form a salt, carbon dioxide gas, and water (e.g., Na₂CO₃ + HCl → NaCl + H₂O + CO₂). Carbon dioxide turns limewater milky.\n    *   **Neutralisation Reaction:** Acids and bases react with each other to form a salt and water, nullifying each other's effects (Acid + Base → Salt + Water; e.g., HCl + NaOH → NaCl + H₂O).\n    *   **Metallic Oxides with Acids:** Metallic oxides are generally basic and react with acids to form salt and water.\n    *   **Non-metallic Oxides with Bases:** Non-metallic oxides are generally acidic and react with bases to form salt and water.\n\n3.  **Common Properties of Acids and Bases:**\n    *   **Acids** produce hydrogen ions (H⁺ or H₃O⁺) in aqueous solutions, which are responsible for their acidic properties and enable them to conduct electricity.\n    *   **Bases** produce hydroxide ions (OH⁻) in aqueous solutions. Water-soluble bases are called **alkalis**.\n    *   The process of dissolving acids or bases in water is highly **exothermic**. Concentrated acids should always be added slowly to water, not vice versa, to prevent splashing and burns.\n    *   **Dilution** reduces the concentration of H⁺ or OH⁻ ions per unit volume.\n\n4.  **pH Scale:**\n    *   The **pH scale** (0 to 14) measures the concentration of hydrogen ions in a solution.\n    *   **pH 7** is neutral. **pH < 7** is acidic (lower pH = more acidic), and **pH > 7** is basic (higher pH = more basic).\n    *   **Strong acids/bases** produce more H⁺/OH⁻ ions than **weak acids/bases** at the same concentration.\n    *   **Importance of pH in everyday life:**\n        *   Living organisms survive within a narrow pH range (7.0-7.8).\n        *   **Acid rain** (pH < 5.6) harms aquatic life.\n        *   Soil pH affects plant growth.\n        *   Stomach acid (HCl) aids digestion; indigestion is treated with antacids (mild bases).\n        *   Tooth decay occurs when mouth pH drops below 5.5.\n        *   Self-defense by animals/plants often involves acids (e.g., bee sting, nettle sting).\n\n5.  **Salts:**\n    *   Salts are formed from acid-base reactions.\n    *   The pH of a salt solution depends on the strength of the parent acid and base:\n        *   Strong acid + Strong base = Neutral salt (pH 7).\n        *   Strong acid + Weak base = Acidic salt (pH < 7).\n        *   Weak acid + Strong base = Basic salt (pH > 7).\n    *   **Common Salt (Sodium Chloride - NaCl)** is a vital raw material for industrial chemicals:\n        *   **Sodium Hydroxide (NaOH):** Produced by the **chlor-alkali process** (electrolysis of brine), also yielding chlorine gas (Cl₂) and hydrogen gas (H₂).\n        *   **Bleaching Powder (Ca(ClO)₂):** Produced by the action of chlorine on dry slaked lime. Used for bleaching, as an oxidizing agent, and for disinfecting water.\n        *   **Baking Soda (Sodium Hydrogencarbonate - NaHCO₃):** A mild basic salt used in baking powder (releases CO₂ for rising), as an antacid, and in fire extinguishers.\n        *   **Washing Soda (Sodium Carbonate decahydrate - Na₂CO₃.10H₂O):** Produced by recrystallization of sodium carbonate (obtained from baking soda). Used in glass, soap, paper industries, for borax manufacturing, as a cleaning agent, and for removing water hardness.\n    *   **Water of Crystallisation:** Fixed number of water molecules present in one formula unit of a salt (e.g., CuSO₄.5H₂O, Na₂CO₃.10H₂O).\n    *   **Plaster of Paris (Calcium Sulphate Hemihydrate - CaSO₄.½H₂O):** Obtained by heating gypsum (CaSO₄.2H₂O). It's a white powder that hardens into gypsum when mixed with water, used for casts, toys, and decorations."
+}
+Saving blocks to DB. Length: 17
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-27T19:10:23.622Z ---
+INPUT: {
+  "pageId": "8aa3f1fc-1a12-40dd-a2b2-6b7fce5c5947",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "Chapter 2: Acids, Bases and Salts"
+    },
+    {
+      "type": "paragraph",
+      "content": "This document, \"Chapter 2: Acids, Bases and Salts,\" introduces fundamental concepts related to these chemical substances."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "1. Introduction to Acids and Bases"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acids are typically sour and turn blue litmus red; bases are bitter and turn red litmus blue."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acids and bases neutralize each other's effects."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Indicators (like litmus, turmeric, phenolphthalein, methyl orange) change color to show if a substance is acidic or basic. Olfactory indicators (like onion, vanilla, clove oil) change odor."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "2. Chemical Properties of Acids and Bases"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acids react with Metals:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Produce a salt and hydrogen gas (e.g., zinc with sulfuric acid)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Bases react with Metals:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Some bases react with metals to produce a salt and hydrogen gas (e.g., zinc with sodium hydroxide)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acids react with Metal Carbonates/Hydrogencarbonates:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Produce a salt, carbon dioxide gas, and water (e.g., sodium carbonate with HCl). Carbon dioxide turns limewater milky."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acids and Bases react (Neutralization):",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " An acid reacts with a base to form a salt and water, cancelling out their properties (e.g., HCl + NaOH → NaCl + H2O)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Metallic Oxides are Basic:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " They react with acids to form salt and water."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Non-metallic Oxides are Acidic:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " They react with bases to form salt and water."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "3. What Acids and Bases Have in Common"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Aqueous Solutions Conduct Electricity:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Acids and bases form ions in water (H+ from acids, OH- from bases), allowing them to conduct electricity. Compounds like glucose and alcohol, though containing hydrogen, do not form ions and thus don't show acidic behavior or conduct electricity."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Ion Formation in Water:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Acids produce H+ ions (which exist as hydronium ions, H3O+) in aqueous solutions, responsible for their acidic properties. Bases produce OH- ions in water. Water-soluble bases are called alkalis."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Dilution:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " The process of mixing an acid or base with water is highly exothermic. It's crucial to add acid slowly to water, not the other way around, to prevent splashing and excessive heat. Dilution decreases the concentration of H3O+ or OH- ions."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "4. Strength of Acid or Base Solutions (pH Scale)"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "pH Scale:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " A scale from 0 to 14 used to measure hydrogen ion concentration. pH < 7 indicates an acidic solution, pH = 7 is neutral, and pH > 7 indicates a basic (alkaline) solution. Lower pH means higher H+ concentration and stronger acidity."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Strength vs. Concentration:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Strong acids/bases produce many H+/OH- ions, while weak acids/bases produce fewer, even at the same concentration."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Importance of pH in Everyday Life"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Biological Systems:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Living organisms thrive within a narrow pH range (e.g., human body pH 7.0-7.8)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Acid Rain:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Rainwater with pH below 5.6 harms aquatic life."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Soil pH:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Important for healthy plant growth."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Digestion:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Stomach produces HCl for digestion; indigestion is treated with antacids (bases)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Tooth Decay:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Occurs when mouth pH drops below 5.5, corroding tooth enamel. Basic toothpastes help neutralize acids."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Self-Defense:",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Animals and plants use acids for defense (e.g., bee stings, nettle stings secrete methanoic acid, which can be neutralized by mild bases)."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "5. More About Salts"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Salt Families"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Salts can be grouped by common positive or negative radicals."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "pH of Salts"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Salts of strong acid + strong base are neutral (pH 7)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Salts of strong acid + weak base are acidic (pH < 7)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Salts of strong base + weak acid are basic (pH > 7)."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Chemicals from Common Salt (NaCl)"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "NaCl is a raw material for various industrial chemicals:"
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "props": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Sodium Hydroxide (NaOH):",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Produced by the chlor-alkali process (electrolysis of brine), yielding NaOH, chlorine (Cl2), and hydrogen (H2)."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "props": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Bleaching Powder (Ca(ClO)2):",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Formed by reacting chlorine with dry slaked lime. Used for bleaching, as an oxidizing agent, and to disinfect water."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "props": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Baking Soda (Sodium Hydrogencarbonate, NaHCO3):",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " A mild basic salt used in baking powder (releases CO2 for rising), as an antacid, and in soda-acid fire extinguishers."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "props": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Washing Soda (Sodium Carbonate Decahydrate, Na2CO3.10H2O):",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " Used in glass, soap, and paper industries, for making borax, as a cleaning agent, and for removing water hardness."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Water of Crystallisation"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Many salts, though appearing dry, contain a fixed number of water molecules chemically bound within their crystal structure (e.g., copper sulphate, CuSO4.5H2O, is blue; becomes white when water is removed by heating)."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Plaster of Paris (Calcium Sulphate Hemihydrate, CaSO4.½H2O)"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Formed by heating gypsum (CaSO4.2H2O). It is a white powder that, when mixed with water, sets into a hard solid (gypsum), used for supporting fractured bones, making toys, and decorative materials."
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 62
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-27T19:18:32.242Z ---
+INPUT: {
+  "pageId": "8aa3f1fc-1a12-40dd-a2b2-6b7fce5c5947",
+  "blockType": "text",
+  "data": "Here's an assignment designed for Class IX students, drawing from both the English (Beehive) and Science (Chemical Reactions) texts you provided. It aims to integrate comprehension, analytical thinking, language skills, and scientific application.\n\n---\n\n## Class IX Integrated Assignment: Exploring the Future of Learning and Chemical Changes\n\n**Subject Areas:** English Language Arts (Beehive) & Science (Chemical Reactions and Equations)\n**Maximum Marks:** 50\n**Duration:** Recommended 2-3 hours (can be split into parts)\n\n**Learning Objectives:**\n*   To comprehend and analyze literary texts and instructional material.\n*   To apply vocabulary and grammatical concepts.\n*   To understand and apply fundamental scientific principles related to chemical reactions.\n*   To develop critical thinking, analytical, and communicative skills.\n*   To connect concepts across different subject areas and to real-world scenarios.\n\n---\n\n### **Part A: English Language Arts – \"The Fun They Had\" & Textual Analysis (25 Marks)**\n\n**Instructions:** Read \"The Fun They Had\" (pages 5-9) and the \"Notes for the Teacher\" (pages 1-4) from the Beehive textbook carefully before attempting these questions.\n\n**1. Reading Comprehension & Critical Thinking (10 Marks)**\n\nAnswer the following questions based on \"The Fun They Had\":\n\na.  **Main Features of Future Schools:** Describe the main characteristics of Margie and Tommy's school system, including their teachers and learning environment. How does this contrast with traditional schools? (4 marks)\nb.  **Margie's Perspective:** Why did Margie hate her school? What aspects of the \"old kind of school\" did she imagine must have been fun, and why? (3 marks)\nc.  **Your Opinion:** Do you agree with Margie that schools today (your school) are more fun than the futuristic school described in the story? Give at least two well-reasoned arguments to support your answer. (3 marks)\n\n**2. Vocabulary and Grammar in Context (8 Marks)**\n\na.  **Adverbs:** From the list of adverbs provided in the \"Thinking about Language\" section (page 11, Part I), identify the sentences from \"The Fun They Had\" where the following adverbs are used:\n    *   i) `awfully`\n    *   ii) `sorrowfully`\n    *   iii) `loftily`\n    *   iv) `nonchalantly`\n    (4 marks)\nb.  **Conditional Sentences (If Not / Unless):** Complete the following conditional sentences using the correct form of the verb, as demonstrated in the \"Thinking about Language\" section (page 12, Part II). Choose any two of the following:\n    *   i) If I don't go to Anu's party tonight, ____________.\n    *   ii) If you don't telephone the hotel to order food, ____________.\n    *   iii) Unless you promise to write back, I ____________.\n    *   iv) If she doesn't play any games, ____________.\n    (2 marks)\nc.  **Word Building:** Make adverbs from the following adjectives by adding '-ly'. (page 12, Part I, Q3)\n    *   i) `happy`\n    *   ii) `gloomy`\n    (2 marks)\n\n**3. Formal Letter Writing (7 Marks)**\n\nImagine you are a librarian at a school in the year 2157, and you have heard about a limited re-print of Isaac Asimov's \"The Fun They Had\" in traditional paper book format. Write a formal letter to a publisher, \"Literary Revival Press,\" requesting to order a set of these books for your school library.\n\n*   Include your school's address (e.g., Futureville High School Library, Sector 7, Neo-Delhi), the current date (e.g., 25th October 2157), and the publisher's address (e.g., Literary Revival Press, 123 Heritage Lane, Old Town, Mumbai).\n*   Clearly state the purpose of your letter: ordering a set of \"The Fun They Had\" (mentioning it's a paper book version) and specifying delivery via a secure future postal service (e.g., Automated Delivery Drone Service).\n*   Remember the characteristics of a formal letter (no contractions, polite tone).\n\n---\n\n### **Part B: Science – Chemical Reactions and Equations (20 Marks)**\n\n**Instructions:** Refer to the text on \"Chemical Reactions and Equations\" (second document, pages 1-13) to answer the following questions.\n\n**1. Understanding Chemical Reactions (6 Marks)**\n\na.  **Indications of a Chemical Reaction:** List any three observable changes that help us determine if a chemical reaction has taken place. (3 marks)\nb.  **Importance of Balancing:** Why is it necessary to balance a chemical equation? What law does balancing adhere to? (3 marks)\n\n**2. Balancing Chemical Equations & Types of Reactions (8 Marks)**\n\na.  **Balancing:** Balance the following chemical equations as demonstrated in the text.\n    *   i) Fe + H₂O → Fe₃O₄ + H₂ (2 marks)\n    *   ii) HNO₃ + Ca(OH)₂ → Ca(NO₃)₂ + H₂O (2 marks)\nb.  **Identifying Reaction Types:** For each of the following reactions, identify the type of chemical reaction (Combination, Decomposition, Displacement, Double Displacement, or Oxidation-Reduction).\n    *   i) 2H₂(g) + O₂(g) → 2H₂O(l) (1 mark)\n    *   ii) 2AgCl(s) → 2Ag(s) + Cl₂(g) (1 mark)\n    *   iii) Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s) (1 mark)\n    *   iv) Na₂SO₄(aq) + BaCl₂(aq) → BaSO₄(s) + 2NaCl(aq) (1 mark)\n\n**3. Real-World Applications of Oxidation (6 Marks)**\n\na.  **Corrosion:** Explain what corrosion is and provide two examples of its occurrence mentioned in the text. (3 marks)\nb.  **Rancidity Prevention:** Why are chips bags flushed with a gas like nitrogen? Explain the phenomenon it prevents. (3 marks)\n\n---\n\n### **Part C: Interdisciplinary Connection – Digital Learning & Society (5 Marks)**\n\n**Instructions:** This section requires you to think critically and connect ideas from both English and Science texts.\n\n**1. The Role of Technology in Education:**\nThe English text mentions a project on \"digital services\" and the story \"The Fun They Had\" depicts a future dominated by mechanical teachers and telebooks. Considering this, and the advancements in science (e.g., simulations, online learning platforms), discuss the potential benefits and challenges of relying heavily on digital technology for science education in the future.\n\n*   Consider aspects like accessibility, engagement, practical experiments, and human interaction.\n*   Write your answer in a short paragraph (approx. 80-100 words). (5 marks)\n\n---"
+}
+Saving blocks to DB. Length: 64
+Saved successfully to Postgres.

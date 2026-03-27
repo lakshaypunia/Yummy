@@ -85,12 +85,12 @@ export async function toolExecutorNode(state: AgentState): Promise<Partial<Agent
     return item;
   }
 
-  // Run ready steps in parallel
   const settled = await Promise.allSettled(
     readySteps.map(step =>
       executeTool(step.tool, resolvePlaceholders(step.input), {
         userId: state.userId,
         pageId: state.pageId,
+        selectedDocs: state.selectedDocs,
       })
     )
   )

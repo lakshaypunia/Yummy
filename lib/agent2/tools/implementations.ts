@@ -11,12 +11,12 @@ import { updatePage, broadcastProgress } from './update-page'
 
 export { broadcastProgress }
 
-export async function executeTool(toolName: ToolName, input: any, ctx: { userId: string, pageId: string | null }): Promise<any> {
+export async function executeTool(toolName: ToolName, input: any, ctx: { userId: string, pageId: string | null, selectedDocs?: any[] }): Promise<any> {
     console.log(`[Agent - Tool Dispatch] Executing '${toolName}' with input:`, JSON.stringify(input).slice(0, 150) + "...")
     switch (toolName) {
         case 'read_pdf': 
             if (!ctx.pageId) throw new Error("pageId is required to read PDF")
-            return readPdf({ pageId: ctx.pageId })
+            return readPdf({ pageId: ctx.pageId }, ctx.selectedDocs)
         case 'generate_text': return generateText(input)
         case 'generate_blocks': return generateBlocks(input)
         case 'generate_script': return generateScript(input)
