@@ -2558,3 +2558,1371 @@ INPUT: {
 }
 Saving blocks to DB. Length: 64
 Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-27T19:39:48.371Z ---
+INPUT: {
+  "pageId": "911bb63a-e922-4010-9f92-02dadf60ad48",
+  "blockType": "video",
+  "data": "https://youtu.be/vfVcDUCucSs?si=ppQ_4Bq2XV6KeFOD"
+}
+Saving blocks to DB. Length: 2
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-27T19:40:15.928Z ---
+INPUT: {
+  "pageId": "911bb63a-e922-4010-9f92-02dadf60ad48",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textColor": "blue"
+      },
+      "content": "Agent Memory Series: Building Your Personalized AI Agent"
+    },
+    {
+      "type": "paragraph",
+      "content": "This series will guide you through managing your agent's memory to build truly personalized AI agents. Over three episodes, you'll learn how to give your AI agent real memory, step-by-step."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "purple"
+      },
+      "content": "Series Overview"
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Episode 1: Short-Term Memory",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " - Learn how your agent remembers what you said earlier in the same conversation. We'll fix memory loss in a trip planning agent using ADK sessions and session services."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Episode 2: Persistent User Preferences",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " - Move from in-memory storage to a database to build a simple user preference store, allowing agents to remember facts (e.g., 'you're vegetarian') across new conversations."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Episode 3: Long-Term Memory",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " - Utilize Vortex AI memory bank service to enable agents to recall facts from past conversations, including images, video, and audio, using a preload memory tool."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "By the end, you'll be able to build AI agents that remember conversations and past experiences across time and media."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "green"
+      },
+      "content": "Episode 1: Agent Short-Term Memory & Sessions"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "First, let's understand what a ",
+          "styles": {}
+        },
+        {
+          "type": "text",
+          "text": "session",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " means. A session is one continuous conversation, like a single chat thread on your phone."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": "In ADK web UI, it defaults to an in-memory session service."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "If you create a new session, the agent behaves as if it's meeting you for the first time, unable to access previous conversation history."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "red"
+      },
+      "content": "Problem: The Memory Loss Example"
+    },
+    {
+      "type": "paragraph",
+      "content": "Consider a trip planning agent:"
+    },
+    {
+      "type": "numberedListItem",
+      "content": "Turn 1: User asks, \"Plan a two-day trip to Lisbon.\" The agent plans Day 1."
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Turn 2: User says, \"Perfect. Plan Day 2.\"",
+          "styles": {}
+        },
+        {
+          "type": "text",
+          "text": " – If a new session is created, the agent forgets everything (city, plan, user interests) and starts over.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "textColor": "green"
+      },
+      "content": "The Solution: Using the Same Session"
+    },
+    {
+      "type": "paragraph",
+      "content": "By creating and reusing a single session across multiple turns, the agent can retain context."
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "With the same session, if you ask \"Plan Day 2\" at Turn 3, the agent can look back at the full conversation and adapt the plan. This is the ",
+          "styles": {}
+        },
+        {
+          "type": "text",
+          "text": "magic of sessions",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ".",
+          "styles": {}
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "blue"
+      },
+      "content": "Key Components Inside a Session"
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "1. Events"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "This is like the transcript of every user message and agent reply, including user media input (e.g., image data)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Provides the agent with conversation context, allowing it to read earlier messages."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "2. State"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Think of this as a small 'sticky note' for quick access to important information."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Examples: a restaurant name, a confirmation number, a travel destination."
+    },
+    {
+      "type": "paragraph",
+      "content": "Why use State? You don't want your model to re-read 15 messages just to find one value. State allows you to store and reuse it efficiently."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "orange"
+      },
+      "content": "Agent Collaboration with Session State"
+    },
+    {
+      "type": "paragraph",
+      "content": "Session state facilitates seamless collaboration between multiple agents:"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Example: Agent A finds a restaurant and outputs its name (e.g., mapped to a 'destination' key)."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Agent B automatically receives this 'destination' as a variable and can then provide directions."
+    },
+    {
+      "type": "paragraph",
+      "content": "This enables agents to work together without constantly parsing the entire conversation transcript."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "backgroundColor": "red",
+        "textColor": "default"
+      },
+      "content": "Important: How to Modify Session State Safely"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "NEVER ",
+          "styles": {
+            "bold": true,
+            "textColor": "red"
+          }
+        },
+        {
+          "type": "text",
+          "text": "modify the session object directly in your tool code. Changes won't be recorded in the event log or saved by the persistent service.",
+          "styles": {}
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "INSTEAD",
+          "styles": {
+            "bold": true,
+            "textColor": "green"
+          }
+        },
+        {
+          "type": "text",
+          "text": ", use the ",
+          "styles": {}
+        },
+        {
+          "type": "text",
+          "text": "context",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " that ADK provides (via tool or callback).",
+          "styles": {}
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "When you write to `context.state`, ADK records the change with the event, ensuring it can be stored and recovered when moving to database and long-term memory."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "backgroundColor": "blue",
+        "textColor": "default"
+      },
+      "content": "Episode 1 Recap: Short-Term Memory"
+    },
+    {
+      "type": "bulletListItem",
+      "content": "A session represents one continuous conversation thread."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Events are like the conversation transcript, providing context."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "State is a structured 'scratchpad' for quick access to key information."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Using the same session across turns with an in-memory session service prevents memory loss."
+    },
+    {
+      "type": "bulletListItem",
+      "content": "Always write state through `context` so ADK can save it for persistence."
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "This provides your agent with ",
+          "styles": {}
+        },
+        {
+          "type": "text",
+          "text": "short-term working memory",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", which is fast but temporary (like RAM).",
+          "styles": {}
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "purple"
+      },
+      "content": "What's Next?"
+    },
+    {
+      "type": "paragraph",
+      "content": "In the next episode, we will add persistence to ensure your agent can survive an app restart and still remember the user, moving beyond temporary memory."
+    }
+  ]
+}
+Saving blocks to DB. Length: 47
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T07:02:24.903Z ---
+INPUT: {
+  "pageId": "8aa3f1fc-1a12-40dd-a2b2-6b7fce5c5947",
+  "blockType": "video",
+  "data": "https://youtu.be/OHCf75KS8i4?si=PDoMbV0p3ANMUrZq"
+}
+Saving blocks to DB. Length: 66
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T07:02:56.211Z ---
+INPUT: {
+  "pageId": "8aa3f1fc-1a12-40dd-a2b2-6b7fce5c5947",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "textColor": "purple",
+        "textAlignment": "center"
+      },
+      "content": "Building Europe's Robotics Superpower: The Rise of Student Robotics Clubs"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The transformation of Europe into a robotics superpower hinges on empowering highly talented young individuals with space, resources, and the freedom to pursue their passions. In recent months, multiple new robotics clubs have emerged across Europe, now joining forces to cultivate the next generation of robotics founders."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Many of these students are poised to build Europe's next multi-billion euro companies. To understand this burgeoning movement, we visited four pioneering clubs:"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "ETH Robotics Club in Zurich"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "EPFL in Lausanne"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "TU Vienna Robotics Club"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "props": {
+        "textColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Robbotom (Munich) - a founding member of Estra"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "green"
+      },
+      "content": "ETH Robotics Club, Zurich: A Hub of Innovation"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The ETH Robotics Club boasts impressive achievements in just six months:"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Raised over "
+        },
+        {
+          "type": "text",
+          "text": "1 million dollars",
+          "styles": {
+            "bold": true,
+            "textColor": "green"
+          }
+        },
+        {
+          "type": "text",
+          "text": " in sponsorships."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Secured a massive "
+        },
+        {
+          "type": "text",
+          "text": "hanger space",
+          "styles": {
+            "bold": true,
+            "textColor": "green"
+          }
+        },
+        {
+          "type": "text",
+          "text": " for development."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Aims to build a "
+        },
+        {
+          "type": "text",
+          "text": "full humanoid robot in a year",
+          "styles": {
+            "bold": true,
+            "textColor": "green"
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Origin Story & Philosophy"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Eight months ago, the founder simply wanted to build a humanoid robot. After realizing the scale required a large team and resources beyond a kitchen setup, and finding no existing local club to join, he decided to create one. The core idea is to make robotics more "
+        },
+        {
+          "type": "text",
+          "text": "accessible",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " to average students, fostering the development of crucial technological competencies in Europe without gatekeeping."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "The Hanger Space: A Hardware Wonderland"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The club's dedicated space includes:"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Humanoids and drone testing area (with safety nets)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Tech teams' workstations and meeting rooms."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Various project areas, including a conveyor belt system."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "A shipping container housing a robotic waste management system for rivers."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "A team actively developing a Mars rover."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "yellow"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Described as "
+        },
+        {
+          "type": "text",
+          "text": "“Disneyland for hardware freaks”",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", the space even includes personal amenities like a power rack for fitness, highlighting a comprehensive environment for dedicated innovators."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "The Manufacturing Imperative"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "A critical aspect is the in-house manufacturing division, combating Europe's loss of manufacturing knowledge. The club emphasizes learning to "
+        },
+        {
+          "type": "text",
+          "text": "work with hands and build things",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", recognizing that ceding manufacturing autonomy means losing control of product ownership. Future plans include expanding to a full mechanical workshop."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The founder's dedication is evident: he "
+        },
+        {
+          "type": "text",
+          "text": "lives in a camper van outside the hanger",
+          "styles": {
+            "bold": true,
+            "italic": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", maximizing time spent building."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Beyond Robotics: A Collective Ecosystem"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The hanger houses numerous student clubs and startups, fostering a vibrant ecosystem:"
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Industrial drones for infrastructure work."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Swiss Loop (Hyperloop team)."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "AMZ Racing: building a fully electric race car (0-100 km/h in "
+        },
+        {
+          "type": "text",
+          "text": "1.9 seconds",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ") with world records."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Celsius: developing a hydrogen-powered plane."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Solar-powered car team that traveled across Australia."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Students working on actual rockets."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left",
+        "backgroundColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "This collective environment demonstrates how providing students with resources enables them to "
+        },
+        {
+          "type": "text",
+          "text": "build crazy things",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " and shape the future."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "orange"
+      },
+      "content": "Estra: Connecting Europe's Robotics Future"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The idea for Estra originated from a desire to scale beyond individual city hubs like Munich. Connecting with the ETH Robotics Club revealed a shared vision for a European-wide initiative."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "The Vision of Estra"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "A "
+        },
+        {
+          "type": "text",
+          "text": "legal organization and federation",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " of robotics clubs across Europe."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Currently includes ETH Robotics Club, Robbotom, and "
+        },
+        {
+          "type": "text",
+          "text": "13+ other clubs",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " from all over Europe."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Goals include "
+        },
+        {
+          "type": "text",
+          "text": "technical collaborations",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", joint "
+        },
+        {
+          "type": "text",
+          "text": "events",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", and exploring "
+        },
+        {
+          "type": "text",
+          "text": "funding options",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " to advance the European robotics ecosystem."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Addressing European Fragmentation"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Unlike the Bay Area, Europe often undersells its successes. A key challenge is the "
+        },
+        {
+          "type": "text",
+          "text": "fragmentation",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " of its robotics hubs, with talent often confined to individual cities. Estra aims to connect these hubs, creating a "
+        },
+        {
+          "type": "text",
+          "text": "European baseline for robotics",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", ensuring students build lasting connections from their studies into their careers."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "blue"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "In "
+        },
+        {
+          "type": "text",
+          "text": "5-10 years",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", Estra and "
+        },
+        {
+          "type": "text",
+          "text": "Generation Robotics",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " envision becoming the primary source for roboticists and entrepreneurship in Europe, even hosting robotics events on the scale of the "
+        },
+        {
+          "type": "text",
+          "text": "Olympic Games",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "pink"
+      },
+      "content": "EPFL, Lausanne: A One-Week-Old Powerhouse"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The EPFL AI Robotics Team, just "
+        },
+        {
+          "type": "text",
+          "text": "one week old",
+          "styles": {
+            "bold": true,
+            "italic": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", already demonstrates incredible momentum, utilizing a shared prototyping space accessible to all accredited students."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Inaugural Projects"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "BARK project: designing and assembling a robotics dog, incorporating reinforcement learning."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "SAPION: assembling and enhancing an open-source humanoid dog developed by Berkeley PhDs."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Onboarding projects for students new to robotics, ensuring accessibility."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "pink"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The team dares to imagine a future with a much more developed club and amazing in-house developed humanoids within "
+        },
+        {
+          "type": "text",
+          "text": "five years",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "brown"
+      },
+      "content": "TU Vienna: Fostering Future Entrepreneurs"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The TU Vienna Robotics Club, launched in January, serves as a student association for technical students passionate about robotics. It boasts a community of "
+        },
+        {
+          "type": "text",
+          "text": "250 people, with 60 actively engaged in projects",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Vision & Impact"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "brown"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "There's a strong belief that "
+        },
+        {
+          "type": "text",
+          "text": "at least 2-3 individuals from this club will launch billion-dollar companies",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", driven by their obsession and dedication to robotics."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Why Start a Robotics Club Now?"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Robotics is the "
+        },
+        {
+          "type": "text",
+          "text": "most important and interesting field",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " right now."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Affordable hardware and software enable students to "
+        },
+        {
+          "type": "text",
+          "text": "imagine and build",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " their ideas."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Clubs provide the necessary "
+        },
+        {
+          "type": "text",
+          "text": "infrastructure, hardware, and funding",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "content": "Advice for Aspiring Club Founders"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "The most crucial first step is to "
+        },
+        {
+          "type": "text",
+          "text": "find one other person",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " with shared interests and goals. This transforms an "
+        },
+        {
+          "type": "text",
+          "text": "“I” into a “We”",
+          "styles": {
+            "italic": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", rapidly accelerating growth from a few individuals to a large community."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "textColor": "red"
+      },
+      "content": "The Power of Starting: A Unified Vision"
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "backgroundColor": "red",
+        "textColor": "default"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "As Declan from ETH Robotics aptly puts it: "
+        },
+        {
+          "type": "text",
+          "text": "“Anyone can start a company at any time. You just have to have a vision, believe in it, and have a rough idea of how to get there… You don’t have to be perfect to start something. Just start.”",
+          "styles": {
+            "bold": true,
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "These robotics clubs are creating vital spaces for ambitious, robotics-obsessed young people. It's a strong bet that this growing network will produce "
+        },
+        {
+          "type": "text",
+          "text": "multiple founders of billion-euro companies",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": ", actively shaping Europe's technological future."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "props": {
+        "textAlignment": "left"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Organizations like Prototype are actively supporting these student initiatives, fostering innovation and change."
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 131
+Saved successfully to Postgres.

@@ -14,6 +14,8 @@ import { useState, useEffect } from "react";
 import { useBroadcastStore } from "@/hooks/useBroadcastStore";
 import { useUser } from "@clerk/nextjs";
 import { SpaceDocumentsModal } from "@/components/SpaceDocumentsModal";
+import { TranscriptModal } from "@/components/editor/TranscriptModal";
+import { Mic } from "lucide-react";
 
 interface PageSidebarProps {
     spaceId: string;
@@ -26,9 +28,13 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
     const [isCreating, setIsCreating] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
+    const [isTranscriptModalOpen, setIsTranscriptModalOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
     const { triggerSidebarRefresh } = useRealtimeSpace();
+
+    const pageMatch = pathname.match(/\/pages\/([^/]+)/);
+    const currentPageId = pageMatch ? pageMatch[1] : "";
 
     const handleCreatePage = async () => {
         setIsCreating(true);
@@ -198,6 +204,18 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
                         </button>
                     </TooltipButton>
 
+                    <TooltipButton content="Video Transcript">
+                        <button
+                            onClick={() => {
+                                if (!currentPageId) return alert("Please open a page first");
+                                setIsTranscriptModalOpen(true);
+                            }}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-text-muted)] hover:bg-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-colors duration-150"
+                        >
+                            <Mic className="w-4 h-4" />
+                        </button>
+                    </TooltipButton>
+
                     <TooltipButton content="Documents">
                         <button
                             onClick={() => setIsDocumentsModalOpen(true)}
@@ -226,6 +244,13 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
                     isOpen={isDocumentsModalOpen}
                     onClose={() => setIsDocumentsModalOpen(false)}
                     userId={user?.id}
+                />
+
+                <TranscriptModal 
+                    isOpen={isTranscriptModalOpen}
+                    onClose={() => setIsTranscriptModalOpen(false)}
+                    pageId={currentPageId}
+                    spaceId={spaceId}
                 />
             </div>
         );
@@ -338,6 +363,14 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
                     label="Whiteboard"
                 />
                 <SidebarButton
+                    onClick={() => {
+                        if (!currentPageId) return alert("Please open a page first");
+                        setIsTranscriptModalOpen(true);
+                    }}
+                    icon={<Mic className="w-4 h-4" />}
+                    label="Video Transcript"
+                />
+                <SidebarButton
                     onClick={() => setIsDocumentsModalOpen(true)}
                     icon={<FileText className="w-4 h-4" />}
                     label="Documents"
@@ -355,6 +388,13 @@ export function PageSidebar({ spaceId, initialPages, isOwner = false }: PageSide
                 isOpen={isDocumentsModalOpen}
                 onClose={() => setIsDocumentsModalOpen(false)}
                 userId={user?.id}
+            />
+
+            <TranscriptModal 
+                isOpen={isTranscriptModalOpen}
+                onClose={() => setIsTranscriptModalOpen(false)}
+                pageId={currentPageId}
+                spaceId={spaceId}
             />
         </div>
     );
