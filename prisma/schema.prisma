@@ -8,6 +8,226 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id           String           @id @default(cuid())
+  clerkId      String           @unique
+  email        String           @unique
+  firstName    String?
+  lastName     String?
+  fullName     String?
+  avatarUrl    String?
+  role         UserRole         @default(STUDENT)
+  permissions  Json?
+  progress     Json?
+  preferences  Json?
+  plan         SubscriptionPlan @default(FREE)
+  credits      Int              @default(0)
+  deletedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  chats        Chat[]
+  documents    Document[]
+  lectures     Lecture[]
+  p5Animations P5Animation[]
+  pages        Page[]
+  spaces       Space[]
+  joinedSpaces SpaceMember[]    @relation("UserJoinedSpaces")
+}
+
+model Space {
+  id                      String                  @id @default(uuid())
+  name                    String
+  description             String?
+  timeline                SpaceTimeline
+  visibility              SpaceVisibility         @default(PRIVATE)
+  authorId                String
+  goal                    String
+  skillLevel              SkillLevel
+  tags                    String[]
+  learningStyle           LearningStyle
+  contentFormatPreference ContentFormatPreference
+  depthPreference         DepthPreference
+  resources               String[]
+  project_roadmap         Json
+  deletedAt               DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  chats                   Chat[]
+  documents               Document[]
+  lectures                Lecture[]
+  pages                   Page[]
+  author                  User                    @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  members                 SpaceMember[]           @relation("SpaceMembers")
+  whiteboard              Whiteboard?
+
+  @@index([authorId])
+  @@index([goal])
+  @@index([skillLevel])
+  @@index([visibility])
+}
+
+model Whiteboard {
+  id        String   @id @default(uuid())
+  spaceId   String   @unique
+  elements  Json?
+  appState  Json?
+  files     Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([spaceId])
+}
+
+model SpaceMember {
+  id        String          @id @default(uuid())
+  spaceId   String
+  userId    String
+  role      SpaceMemberRole @default(MEMBER)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  space     Space           @relation("SpaceMembers", fields: [spaceId], references: [id], onDelete: Cascade)
+  user      User            @relation("UserJoinedSpaces", fields: [userId], references: [clerkId], onDelete: Cascade)
+
+  @@unique([spaceId, userId])
+  @@index([userId])
+  @@index([spaceId])
+}
+
+model Page {
+  id              String         @id @default(uuid())
+  title           String
+  rawDocument     Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  authorId        String
+  deletedAt       DateTime?
+  depth           Int            @default(0)
+  parentPageId    String?
+  spaceId         String
+  blockJson       Json?
+  isIntialised    Boolean        @default(false)
+  isRead          Boolean        @default(false)
+  visibility      PageVisibility @default(EDITABLE)
+  cacheExpiresAt  DateTime?
+  geminiCacheName String?
+  geminiFileUri   String?
+  blocks          Block[]        @relation("PageBlocks")
+  linkedFrom      Block[]        @relation("BlockTargetPage")
+  author          User           @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  parentPage      Page?          @relation("PageChildren", fields: [parentPageId], references: [id])
+  childPages      Page[]         @relation("PageChildren")
+  space           Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([parentPageId])
+  @@index([spaceId])
+  @@index([createdAt])
+  @@index([parentPageId, createdAt])
+}
+
+model Block {
+  id            String   @id @default(uuid())
+  pageId        String
+  parentBlockId String?
+  targetPageId  String?
+  type          String
+  content       Json?
+  position      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  page          Page     @relation("PageBlocks", fields: [pageId], references: [id], onDelete: Cascade)
+  parentBlock   Block?   @relation("BlockChildren", fields: [parentBlockId], references: [id])
+  children      Block[]  @relation("BlockChildren")
+  targetPage    Page?    @relation("BlockTargetPage", fields: [targetPageId], references: [id])
+
+  @@index([pageId, position])
+  @@index([targetPageId])
+}
+
+model Chat {
+  id        String     @id @default(uuid())
+  spaceId   String
+  userId    String
+  title     String?
+  status    ChatStatus @default(ACTIVE)
+  context   Json?
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  messages  Message[]
+
+  @@index([spaceId])
+  @@index([userId])
+  @@index([spaceId, userId])
+  @@index([status])
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  chatId      String
+  role        MessageRole
+  content     String
+  attachments Json?
+  tokenCount  Int?
+  isComplete  Boolean     @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  metadata    Json?
+  chat        Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@index([chatId, role])
+}
+
+model P5Animation {
+  id        String   @id @default(uuid())
+  code      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  key       String
+  size      Int
+  type      String
+  spaceId   String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([spaceId])
+  @@index([authorId])
+}
+
+model Lecture {
+  id          String   @id @default(uuid())
+  title       String
+  videoUrl    String
+  description String?
+  spaceId     String
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
+  space       Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  @@index([spaceId])
+  @@index([authorId])
+}
+
 enum UserRole {
   STUDENT
   TEACHER
@@ -18,32 +238,6 @@ enum SubscriptionPlan {
   FREE
   PRO
   ENTERPRISE
-}
-
-model User {
-  id            String           @id @default(cuid()) 
-  clerkId       String           @unique 
-  email         String           @unique
-  firstName     String?
-  lastName      String?
-  fullName      String?
-  avatarUrl     String?
-  role          UserRole         @default(STUDENT)
-  permissions   Json?
-  progress      Json?
-  preferences   Json?
-  plan          SubscriptionPlan @default(FREE)
-  credits       Int              @default(0)
-  deletedAt     DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  pages         Page[]
-  spaces        Space[]
-  joinedSpaces  SpaceMember[]    @relation("UserJoinedSpaces")
-  chats         Chat[]
-  p5Animations  P5Animation[]
-  documents     Document[]
 }
 
 enum SpaceTimeline {
@@ -87,141 +281,15 @@ enum SkillLevel {
   ADVANCED
 }
 
-model Space {
-  id                      String   @id @default(uuid())
-  name                    String
-  description             String?
-  timeline                SpaceTimeline
-  visibility              SpaceVisibility @default(PRIVATE)
-  authorId                String
-  
-  goal                    String
-  skillLevel              SkillLevel
-  tags                    String[]
-  
-  learningStyle           LearningStyle            
-  contentFormatPreference ContentFormatPreference  
-  depthPreference         DepthPreference
-  resources               String[]
-  project_roadmap         Json
-
-  deletedAt               DateTime?
-
-  author                  User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
-  members                 SpaceMember[] @relation("SpaceMembers")
-  pages                   Page[]
-  chats                   Chat[]
-  whiteboard              Whiteboard?
-  documents               Document[]
-
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-
-  @@index([authorId])
-  @@index([goal])
-  @@index([skillLevel])
-  @@index([visibility])
-}
-
-model Whiteboard {
-  id        String   @id @default(uuid())
-  spaceId   String   @unique
-  elements  Json?
-  appState  Json?
-  files     Json?
-  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@index([spaceId])
-}
-
 enum SpaceMemberRole {
   ADMIN
   MEMBER
-}
-
-model SpaceMember {
-  id        String   @id @default(uuid())
-  spaceId   String
-  userId    String
-  role      SpaceMemberRole @default(MEMBER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  space     Space    @relation("SpaceMembers", fields: [spaceId], references: [id], onDelete: Cascade)
-  user      User     @relation("UserJoinedSpaces", fields: [userId], references: [clerkId], onDelete: Cascade)
-
-  @@unique([spaceId, userId])
-  @@index([userId])
-  @@index([spaceId])
 }
 
 enum PageVisibility {
   PRIVATE
   VIEW_ONLY
   EDITABLE
-}
-
-model Page {
-  id            String    @id @default(uuid())
-  title         String
-  rawDocument   Json?
-  authorId      String
-  parentPageId  String?
-  depth         Int       @default(0)
-  spaceId       String
-  isIntialised  Boolean   @default(false)
-  blockJson     Json?
-  isRead        Boolean   @default(false)
-  visibility    PageVisibility @default(EDITABLE)
-
-  geminiCacheName String?
-  geminiFileUri   String?
-  cacheExpiresAt  DateTime?
-
-  deletedAt     DateTime?
-
-  parentPage    Page?     @relation("PageChildren", fields: [parentPageId], references: [id], onDelete: SetNull)
-  childPages    Page[]    @relation("PageChildren")
-
-  blocks        Block[]   @relation("PageBlocks")
-  linkedFrom    Block[]   @relation("BlockTargetPage")
-  author        User      @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
-  space         Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([authorId])
-  @@index([parentPageId])
-  @@index([spaceId])
-  @@index([createdAt])
-  @@index([parentPageId, createdAt])
-}
-
-model Block {
-  id           String   @id @default(uuid())
-
-  page         Page     @relation("PageBlocks", fields: [pageId], references: [id], onDelete: Cascade)
-  pageId       String
-
-  parentBlockId String?
-  parentBlock   Block?   @relation("BlockChildren", fields: [parentBlockId], references: [id])
-  children      Block[]  @relation("BlockChildren")
-
-  targetPageId String?
-  targetPage   Page?     @relation("BlockTargetPage", fields: [targetPageId], references: [id])
-
-  type         String
-  content      Json?
-  position     Int
-
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([pageId, position])
-  @@index([targetPageId])
 }
 
 enum MessageRole {
@@ -234,95 +302,3 @@ enum ChatStatus {
   ARCHIVED
   DELETED
 }
-
-model Chat {
-  id          String      @id @default(uuid())
-  spaceId     String
-  userId      String      // The user who created/owns this chat
-  title       String?     // Optional: auto-generated or user-provided
-  status      ChatStatus  @default(ACTIVE)
-  
-  // Metadata for AI context
-  context     Json?       // Store space context, settings, model preferences
-  
-  // Soft delete
-  deletedAt   DateTime?
-  
-  // Relations
-  space       Space       @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
-  messages    Message[]
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  
-  // Indexes
-  @@index([spaceId])
-  @@index([userId])
-  @@index([spaceId, userId])
-  @@index([status])
-}
-
-model Message {
-  id          String      @id @default(uuid())
-  chatId      String
-  role        MessageRole
-  content     String      @db.Text // Use Text for longer messages
-  
-  // Optional: for multimodal content (images, files, etc.)
-  attachments Json?
-  
-  // Token tracking for billing/analytics
-  tokenCount  Int?
-  
-  // For streaming/editing support
-  isComplete  Boolean     @default(true)
-  
-  // AI intent classification and extensible metadata
-  metadata    Json?
-  
-  // Soft delete
-  deletedAt   DateTime?
-  
-  // Relations
-  chat        Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  
-  // Indexes - IMPORTANT for performance
-  @@index([chatId, createdAt]) // Fetch messages in order
-  @@index([chatId, role])      // Filter by role if needed
-}
-
-model P5Animation {
-  id        String   @id @default(uuid())
-  code      String   @db.Text
-  userId    String
-  user      User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model Document {
-  id        String   @id @default(uuid())
-  name      String
-  url       String
-  key       String
-  size      Int
-  type      String
-  spaceId   String
-  authorId  String
-  
-  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  author    User     @relation(fields: [authorId], references: [clerkId], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([spaceId])
-  @@index([authorId])
-}
-

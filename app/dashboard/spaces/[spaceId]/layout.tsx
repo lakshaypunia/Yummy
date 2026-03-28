@@ -1,4 +1,4 @@
-import { PageSidebar } from "@/components/PageSidebar";
+import { MasterSidebar } from "@/components/MasterSidebar";
 import { getPagesForSpace } from "@/lib/actions/page.actions";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
@@ -18,12 +18,22 @@ export default async function SpaceLayout({
     const { spaceId } = await params;
 
     const space = await prisma.space.findUnique({
-        where: { id: spaceId }
+        where: { id: spaceId },
+        include: {
+            pages: {
+                where: { deletedAt: null },
+                orderBy: { createdAt: "asc" },
+                take: 1,
+                select: { id: true }
+            }
+        }
     });
 
     if (!space) return notFound();
 
-    const pages = await getPagesForSpace(spaceId);
+    const rootPageId = space.pages?.[0]?.id || "new";
+    const defaultPageHref = `/dashboard/spaces/${space.id}/pages/${rootPageId}`;
+
     const { userId } = await auth();
     const isOwner = space.authorId === userId;
 
@@ -34,15 +44,8 @@ export default async function SpaceLayout({
             <InviteToBroadcastModal spaceId={spaceId} />
 
             <div className="flex h-screen w-full overflow-hidden bg-[var(--color-blockNote-background)]">
-                <PageSidebar
-                    spaceId={spaceId}
-                    initialPages={pages.map((p: any) => ({ id: p.id, title: p.title, visibility: p.visibility }))}
-                    isOwner={isOwner}
-                />
-                {/* ✅ flex-1 + min-w-0 so this column actually fills remaining space */}
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden relative">
-                    {children}
-                </div>
+                <MasterSidebar spaceId={spaceId} isOwner={isOwner} defaultPageHref={defaultPageHref} />
+                {children}
             </div>
         </RealtimeSpaceProvider>
     );

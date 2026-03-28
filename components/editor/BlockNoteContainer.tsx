@@ -11,8 +11,6 @@ import { savePageBlocks } from "@/lib/actions/page.actions";
 import { schema } from "@/components/blockNote/schema";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-import { UploadButton } from "@/utils/uploadthing";
-import { cacheDocumentForPage } from "@/lib/actions/rag.actions";
 
 interface BlockNoteContainerProps {
     pageId: string;
@@ -305,7 +303,6 @@ function InnerEditor({ spaceId, pageId, initialTitle, initialContent, editable, 
 
 export default function BlockNoteContainer({ pageId, spaceId, initialTitle, initialContent, editable = true }: BlockNoteContainerProps) {
     const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | "syncing">("syncing");
-    const [isCaching, setIsCaching] = useState(false);
 
     // Yjs State
     const [doc, setDoc] = useState<Y.Doc>();
@@ -395,45 +392,6 @@ export default function BlockNoteContainer({ pageId, spaceId, initialTitle, init
                 {saveStatus === "saved" && <span className="text-green-600 font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> </span>}
                 {saveStatus === "syncing" && <span className="text-orange-500">Reconnecting...</span>}
                 {saveStatus === "error" && <span className="text-red-500">Failed to save locally</span>}
-            </div>
-
-            {/* Context Caching Upload Button */}
-            <div className="absolute bottom-4 right-8 z-10 flex flex-col items-end gap-2 isolate pointer-events-auto">
-                {isCaching && <span className="text-xs text-[var(--color-primary)] font-medium animate-pulse px-2 py-1 rounded bg-[var(--color-card)]/80 backdrop-blur-md shadow-sm border border-[var(--color-border-primary)]">Caching Document to Gemini...</span>}
-                <UploadButton
-                    endpoint="spaceDocument"
-                    headers={{ "x-space-id": spaceId }}
-                    onClientUploadComplete={async (res) => {
-                        if (res && res[0]) {
-                            setIsCaching(true);
-                            try {
-                                const cacheRes = await cacheDocumentForPage(pageId, res[0].url);
-                                if (cacheRes.success) {
-                                    alert("Document successfully attached to context! You can now use @rag in chat.");
-                                } else {
-                                    alert("Failed to create context cache: " + cacheRes.error);
-                                }
-                            } catch (e) {
-                                console.error(e);
-                                alert("Error processing document cache.");
-                            } finally {
-                                setIsCaching(false);
-                            }
-                        }
-                    }}
-                    onUploadError={(error: Error) => {
-                        console.error("Upload error", error);
-                        alert(`ERROR! ${error.message}`);
-                    }}
-                    appearance={{
-                        button: "bg-[var(--color-primary)] text-white px-3 py-1.5 text-xs rounded-md font-medium cursor-pointer shadow-sm hover:opacity-90 transition-opacity",
-                        container: "w-fit p-1 bg-[var(--color-card)]/80 backdrop-blur-md rounded-lg shadow-sm border border-[var(--color-border-primary)]",
-                        allowedContent: "hidden"
-                    }}
-                    content={{
-                        button: "Attach PDF for @rag"
-                    }}
-                />
             </div>
 
             <InnerEditor

@@ -3926,3 +3926,657 @@ INPUT: {
 }
 Saving blocks to DB. Length: 131
 Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:00:43.892Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "paragraph",
+      "content": "Stars are luminous spheres of plasma held together by their own gravity. They emit light and heat through nuclear fusion in their cores, primarily converting hydrogen into helium. Our Sun is an example of a star."
+    }
+  ]
+}
+Saving blocks to DB. Length: 3
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:01:33.861Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "React Notes"
+    },
+    {
+      "type": "paragraph",
+      "content": "A brief overview of key React concepts."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "1. Components"
+    },
+    {
+      "type": "paragraph",
+      "content": "Independent, reusable pieces of UI. They can be functional (preferred) or class-based. Components manage their own state and props, making UIs modular and maintainable."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "2. JSX (JavaScript XML)"
+    },
+    {
+      "type": "paragraph",
+      "content": "A syntax extension for JavaScript, allowing you to write HTML-like structures directly within your JavaScript code. It's not HTML; it gets compiled into React.createElement calls. It makes UI declaration intuitive."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "3. State"
+    },
+    {
+      "type": "paragraph",
+      "content": "An object that holds some information that might change over the lifetime of the component. When state changes, the component re-renders. Managed using the 'useState' hook in functional components."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "4. Props (Properties)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Read-only attributes passed from a parent component to a child component. They allow data to flow down the component tree and are used to customize child components."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "5. Hooks"
+    },
+    {
+      "type": "paragraph",
+      "content": "Functions that let you 'hook into' React state and lifecycle features from functional components. "
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "useState: Manages component-specific state."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "useEffect: Handles side effects (data fetching, subscriptions, manual DOM manipulation) after every render."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "6. Virtual DOM"
+    },
+    {
+      "type": "paragraph",
+      "content": "A lightweight copy of the actual DOM, stored in memory. React uses it to improve performance by comparing the current Virtual DOM with the previous one to find differences."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "7. Reconciliation"
+    },
+    {
+      "type": "paragraph",
+      "content": "The process by which React updates the actual DOM. When state or props change, React compares the new Virtual DOM with the old one (diffing) and applies only the necessary changes to the real DOM, minimizing costly updates."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "8. Conditional Rendering"
+    },
+    {
+      "type": "paragraph",
+      "content": "Rendering different elements or components based on certain conditions (e.g., if a user is logged in). Achieved using JavaScript operators like if statements, logical &&, or the ternary operator."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "9. List Rendering"
+    },
+    {
+      "type": "paragraph",
+      "content": "Displaying collections of data. Typically done using the JavaScript 'map()' array method. Each item in a list must have a unique 'key' prop to help React efficiently update the list."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "10. Event Handling"
+    },
+    {
+      "type": "paragraph",
+      "content": "React elements handle events similarly to DOM elements, but with some differences (e.g., camelCase for event names, passing functions directly). React's synthetic event system normalizes events across browsers."
+    }
+  ]
+}
+Saving blocks to DB. Length: 26
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:04:29.173Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "Project Meeting Notes - 2023-10-27"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Today's meeting focused on critical updates and next steps for the "
+        },
+        {
+          "type": "text",
+          "text": "Alpha Project Phase",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Key Discussion Points"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Reviewed "
+        },
+        {
+          "type": "text",
+          "text": "user feedback",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " from the initial pilot program."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Discussed "
+        },
+        {
+          "type": "text",
+          "text": "resource allocation",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " for the upcoming development sprints."
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Finalized the "
+        },
+        {
+          "type": "text",
+          "text": "marketing strategy",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " for the public launch."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Action Items for Next Week"
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Team A: "
+        },
+        {
+          "type": "text",
+          "text": "Implement UI improvements",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " based on feedback."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Team B: "
+        },
+        {
+          "type": "text",
+          "text": "Prepare server infrastructure",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " for scaling."
+        }
+      ]
+    },
+    {
+      "type": "numberedListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Marketing: "
+        },
+        {
+          "type": "text",
+          "text": "Draft press release",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": " for review by end of day Friday."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next meeting scheduled for "
+        },
+        {
+          "type": "text",
+          "text": "November 3rd",
+          "styles": {
+            "bold": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 12
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:05:07.776Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "React Notes: A Detailed Overview"
+    },
+    {
+      "type": "paragraph",
+      "content": "React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It's maintained by Meta and a community of individual developers and companies."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Key Concepts"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Components: "
+        },
+        {
+          "type": "text",
+          "text": "The building blocks of any React application. They are independent and reusable pieces of UI.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "JSX: "
+        },
+        {
+          "type": "text",
+          "text": "A syntax extension for JavaScript, allowing you to write HTML-like code directly within JavaScript.",
+          "styles": {
+            "bold": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Virtual DOM: "
+        },
+        {
+          "type": "text",
+          "text": "React uses a virtual representation of the UI to optimize rendering performance.",
+          "styles": {
+            "textColor": "blue"
+          }
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Understanding these core concepts is crucial for effective React development. "
+        },
+        {
+          "type": "text",
+          "text": "Happy coding!",
+          "styles": {
+            "bold": true,
+            "textColor": "green",
+            "backgroundColor": "yellow"
+          }
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 20
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:06:51.100Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "React Notes:-"
+    }
+  ]
+}
+Saving blocks to DB. Length: 2
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:07:07.791Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": []
+}
+Saving blocks to DB. Length: 3
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:07:35.026Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "blocks",
+  "data": [
+    {
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "content": "React: A JavaScript Library for Building User Interfaces"
+    },
+    {
+      "type": "paragraph",
+      "content": "React is a free and open-source front-end JavaScript library for building user interfaces based on UI components. It is maintained by Meta and a community of individual developers and companies."
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Key Concepts"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Components: "
+        },
+        {
+          "type": "text",
+          "text": "Reusable, self-contained blocks of code that return React elements to describe what should appear on the screen.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "JSX: "
+        },
+        {
+          "type": "text",
+          "text": "A syntax extension for JavaScript, allowing you to write HTML-like code within JavaScript files. It's not required but highly recommended.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "State & Props: "
+        },
+        {
+          "type": "text",
+          "text": "Props are used to pass data from parent to child components (read-only). State is internal data managed by a component, allowing it to change over time.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Virtual DOM: "
+        },
+        {
+          "type": "text",
+          "text": "A lightweight copy of the actual DOM. React compares the Virtual DOM with the actual DOM to find the most efficient way to update the user interface, improving performance.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "content": "Why Use React?"
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Declarative Syntax: "
+        },
+        {
+          "type": "text",
+          "text": "React makes it easier to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Component-Based: "
+        },
+        {
+          "type": "text",
+          "text": "Build encapsulated components that manage their own state, then compose them to make complex UIs.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Efficiency: "
+        },
+        {
+          "type": "text",
+          "text": "By using a Virtual DOM, React minimizes direct manipulation of the browser's DOM, leading to faster updates and a smoother user experience.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "bulletListItem",
+      "content": [
+        {
+          "type": "text",
+          "text": "Strong Community & Ecosystem: "
+        },
+        {
+          "type": "text",
+          "text": "React has a vast and active community, meaning abundant resources, tutorials, and third-party libraries are available.",
+          "styles": {
+            "italic": true
+          }
+        }
+      ]
+    }
+  ]
+}
+Saving blocks to DB. Length: 15
+Saved successfully to Postgres.
+
+
+--- updatePage called at 2026-03-28T10:09:13.847Z ---
+INPUT: {
+  "pageId": "970d71a6-4d6e-482a-8457-68c2c80e6562",
+  "blockType": "text",
+  "data": "This document outlines the **Arvyax Full Stack Internship Assignment** to build a **Secure Wellness Session Platform** with authentication, drafting, and auto-save capabilities.\n\n**Objective:**\nThe goal is to design and implement a full-stack application where users can:\n*   Securely register and log in.\n*   View public wellness sessions.\n*   Draft, auto-save, and publish their own custom sessions.\n\n**Preferred Tech Stack:**\n*   **Frontend:** React.js (or Vue/Angular/Next.js)\n*   **Backend:** Node.js + Express (or Django/Flask)\n*   **Database:** MongoDB (Atlas preferred)\n*   **Authentication:** JWT (jsonwebtoken + bcrypt)\n*   **Deployment (Bonus):** Render, Railway, Netlify, or Vercel\n\n**Core Features to Implement:**\n\n1.  **Authentication:**\n    *   `POST /register` for user creation (with hashed passwords).\n    *   `POST /login` to obtain a JWT token.\n    *   Secure storage of JWT on the frontend.\n    *   JWT middleware for protecting backend routes.\n\n2.  **Session Management API (Backend Routes):**\n    *   `GET /sessions`: Retrieve public wellness sessions.\n    *   `GET /my-sessions`: View a user's own sessions (draft and published).\n    *   `GET /my-sessions/:id`: View a single user-owned session.\n    *   `POST /my-sessions/save-draft`: Save or update a session as a draft.\n    *   `POST /my-sessions/publish`: Publish a drafted session.\n\n3.  **Frontend Pages:**\n    *   Login / Register forms.\n    *   Dashboard to view published sessions.\n    *   \"My Sessions\" page to view and edit user's own sessions.\n    *   Session Editor form including fields for Title, Tags, JSON file URL, \"Save as Draft\" / \"Publish\" buttons, and an optional auto-save feature (after 5s of inactivity).\n\n**Database Schemas:**\n*   **User:** `id`, `email`, `password hash`, `created_at`.\n*   **Session:** `_id`, `user_id`, `title`, `tags`, `json_file_url`, `status` (\"draft\" | \"published\"), `created_at`, `updated_at`.\n\n**Bonus Features (Optional, but Preferred):**\n*   Auto-save feedback (e.g., toast message).\n*   Fully functional logout.\n*   Responsive UI.\n*   Deployed demo of both frontend and backend.\n\n**Evaluation Criteria:**\nThe assignment will be evaluated on backend implementation (auth, JWT, API design), frontend (form handling, protected routes, UI), database schema, code quality (structure, naming, comments), system thinking, and bonus features.\n\n**Deliverables:**\n*   A GitHub repository with separate `/backend` (Node+Mongo+Express) and `/frontend` (React/Vue/etc.) folders.\n*   A `README.md` file containing setup instructions and API documentation, with an optional link to a live demo.\n*   An `.env.example` file listing required environment variables.\n\n**Estimated Effort:** 3-5 days, with an emphasis on quality and core functionality."
+}
+Saving blocks to DB. Length: 15
+Saved successfully to Postgres.
